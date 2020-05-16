@@ -1,0 +1,25 @@
+{
+  "name": "discord-bot-bis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ernyx/discord-bot-bis.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ernyx/discord-bot-bis/issues"
+  },
+  "homepage": "https://github.com/ernyx/discord-bot-bis#readme",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "monk": "^7.3.0",
+    "nodemon": "^2.0.4",
+    "request": "^2.88.2"
+  }
+}
