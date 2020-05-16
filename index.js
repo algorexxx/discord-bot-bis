@@ -62,17 +62,22 @@ client.on("message", async (message) => {
 
     case "eyebleach":
     case "eb":
+    case "reb":
       eyeBleach(message, args, user, db, req, fs, client);
       break;
     case "hoteyebleach":
     case "heb":
-      if (message.channel == client.channels.get("434824496856301591")) {
+    case "rheb":
+      if (
+        message.channel == (await client.channels.fetch("434824496856301591"))
+      ) {
         message.channel.send("Psst, not here.. ;)\n");
         return;
       }
       hotEyeBleach(message, args, user, db, req, fs, client);
       break;
     case "fun":
+    case "rfun":
       fun(message, args, user, db, req, fs, client);
       break;
     case "gold":
