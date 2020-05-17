@@ -11,6 +11,7 @@ const helpEmbed = require("./modules/help");
 const eyeBleach = require("./modules/eyeBleach");
 const hotEyeBleach = require("./modules/hotEyeBleach");
 const fun = require("./modules/fun");
+const stats = require("./modules/stats");
 
 client.on("ready", () => {
   console.log("Bot started!");
@@ -82,6 +83,9 @@ client.on("message", async (message) => {
       break;
     case "gold":
       message.channel.send("You have: " + user.gold + " gold.");
+      break;
+    case "stats":
+      stats(message, args, user, db, req, fs, client);
       break;
   }
 
