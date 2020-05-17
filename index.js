@@ -12,6 +12,7 @@ const eyeBleach = require("./modules/eyeBleach");
 const hotEyeBleach = require("./modules/hotEyeBleach");
 const fun = require("./modules/fun");
 const stats = require("./modules/stats");
+const blackjack = require("./modules/blackjack");
 
 client.on("ready", () => {
   console.log("Bot started!");
@@ -64,7 +65,7 @@ client.on("message", async (message) => {
     case "eyebleach":
     case "eb":
     case "reb":
-      eyeBleach(message, args, user, db, req, fs, client);
+      await eyeBleach(message, args, user, db, req, fs, client);
       break;
     case "hoteyebleach":
     case "heb":
@@ -75,17 +76,29 @@ client.on("message", async (message) => {
         message.channel.send("Psst, not here.. ;)\n");
         return;
       }
-      hotEyeBleach(message, args, user, db, req, fs, client);
+      await hotEyeBleach(message, args, user, db, req, fs, client);
       break;
     case "fun":
     case "rfun":
-      fun(message, args, user, db, req, fs, client);
+      await fun(message, args, user, db, req, fs, client);
       break;
     case "gold":
       message.channel.send("You have: " + user.gold + " gold.");
       break;
     case "stats":
       stats(message, args, user, db, req, fs, client);
+      break;
+    case "cock":
+      message.channel.send(
+        "https://media.discordapp.net/attachments/427214398558306304/432283893065056275/alexsexy.png"
+      );
+      break;
+    case "blackjack":
+    case "bet":
+    case "hit":
+    case "stand":
+    case "double":
+      await blackjack(message, args, user, db, req, fs, client);
       break;
   }
 

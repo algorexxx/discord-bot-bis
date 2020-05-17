@@ -22,7 +22,7 @@ async function eyeBleach(message, args, user, db, req, fs, client) {
             db
           )
         );
-        user.eb_watched += 1;
+        user.heb_watched += 1;
       }
     } else {
       let found = await eyeBleachData.findOne({ url: args[1] });
@@ -46,8 +46,10 @@ async function eyeBleach(message, args, user, db, req, fs, client) {
               { upsert: true }
             );
             message.channel.send("Image added to hot eyebleach!");
-            user.gold += 99;
-            user.eb_added += 1;
+            await userData.update(
+              { id: user.id },
+              { $inc: { gold: 100, heb_added: 1 } }
+            );
           } else {
             message.channel.send(res);
           }
@@ -71,12 +73,14 @@ async function eyeBleach(message, args, user, db, req, fs, client) {
         var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,6}\b(\/.*(jpg|jpeg|png|gif|bmp))/gi;
         var match = expression.exec(ebrm.url);
 
-        if (match[2] == "jpg") filetype = "jpeg";
-        else filetype = match[2];
+        if (match) {
+          if (match[2] == "jpg") filetype = "jpeg";
+          else filetype = match[2];
 
-        fs.unlink("./images/heb/" + args[1] + "." + filetype, function () {
-          console.log("remove done");
-        });
+          fs.unlink("./images/heb/" + args[1] + "." + filetype, function () {
+            console.log("remove done");
+          });
+        }
 
         await eyeBleachData.remove({ id: ebrm.id });
 
