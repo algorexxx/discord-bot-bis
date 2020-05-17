@@ -20,6 +20,7 @@
     "discord.js": "^12.2.0",
     "monk": "^7.3.0",
     "nodemon": "^2.0.4",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "rss-parser": "^3.8.0"
   }
 }

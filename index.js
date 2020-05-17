@@ -13,6 +13,8 @@ const hotEyeBleach = require("./modules/hotEyeBleach");
 const fun = require("./modules/fun");
 const stats = require("./modules/stats");
 const blackjack = require("./modules/blackjack");
+const rss = require("./modules/rss");
+const statsUpdate = require("./modules/statsUpdate");
 
 client.on("ready", () => {
   console.log("Bot started!");
@@ -108,5 +110,13 @@ client.on("message", async (message) => {
     { upsert: true }
   );
 });
+
+setInterval(function () {
+  rss(db, req, fs, client);
+}, 600000);
+
+setInterval(function () {
+  statsUpdate(db, req, fs, client);
+}, 180000);
 
 client.login(process.env.DISCORD_TOKEN);
