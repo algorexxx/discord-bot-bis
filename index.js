@@ -19,6 +19,7 @@ const statsUpdate = require("./modules/statsUpdate");
 const coinflip = require("./modules/coinflip");
 const hangMan = require("./modules/hangman");
 const music = require("./modules/music");
+const backup = require("./modules/backup");
 
 client.on("ready", () => {
   console.log("Bot started!");
@@ -131,6 +132,9 @@ client.on("message", async (message) => {
     case "top":
       await music(message, args, user, db, req, fs, client);
       break;
+    case "backup":
+      await backup(db);
+      break;
   }
 });
 
@@ -149,5 +153,9 @@ setInterval(function () {
 setInterval(function () {
   statsUpdate(db, req, fs, client);
 }, 180000);
+
+setInterval(function () {
+  backup(db);
+}, 86400000);
 
 client.login(process.env.DISCORD_TOKEN);

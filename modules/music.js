@@ -75,6 +75,10 @@ async function music(message, args, user, db, req, fs, client) {
             user.music_reqs += 1;
           }
         }
+        await userData.update(
+          { id: user.id },
+          { $inc: { gold: -songs_cost, music_reqs: added_songs } }
+        );
         user.gold -= songs_cost;
         if (added_songs == 1) {
           message.channel.send(
