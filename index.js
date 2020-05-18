@@ -111,6 +111,14 @@ client.on("message", async (message) => {
   }
 });
 
+// Create an event listener for new guild members
+client.on("guildMemberAdd", (member) => {
+  member.send(`Welcome, ${member}. DM emil hjelm for nudes`);
+
+  var role = member.guild.roles.cache.find((role) => role.name === "loverbois");
+  member.roles.add(role.id);
+});
+
 setInterval(function () {
   rss(db, req, fs, client);
 }, 600000);
