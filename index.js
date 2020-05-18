@@ -15,6 +15,7 @@ const stats = require("./modules/stats");
 const blackjack = require("./modules/blackjack");
 const rss = require("./modules/rss");
 const statsUpdate = require("./modules/statsUpdate");
+const coinflip = require("./modules/coinflip");
 
 client.on("ready", () => {
   console.log("Bot started!");
@@ -102,13 +103,12 @@ client.on("message", async (message) => {
     case "double":
       await blackjack(message, args, user, db, req, fs, client);
       break;
+    case "coinflip":
+    case "join":
+    case "cancel":
+      await coinflip(message, args, user, db, req, fs, client);
+      break;
   }
-
-  await userData.update(
-    { id: message.author.id },
-    { $set: user },
-    { upsert: true }
-  );
 });
 
 setInterval(function () {
