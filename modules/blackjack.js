@@ -20,6 +20,7 @@ const card_value_strings = [
 async function blackjack(message, args, user, db, req, fs, client) {
   let blackjack;
   const blackjackData = db.get("blackjacks");
+  const userData = db.get("users");
   switch (args[0].toLowerCase()) {
     case "blackjack":
       if (
@@ -130,6 +131,10 @@ async function blackjack(message, args, user, db, req, fs, client) {
         blackjack.active = 1;
         user.gold -= parseInt(args[1]);
         user.blackjack_hands += 1;
+        await userData.update(
+          { id: user.id },
+          { $inc: { gold: -parseInt(args[1]), blackjack_hands: 1 } }
+        );
 
         msg =
           (await client.users.fetch(user.id)).username +
@@ -149,11 +154,16 @@ async function blackjack(message, args, user, db, req, fs, client) {
         }
         msg += " [" + calcBJValue(blackjack.user_cards) + "]";
         if (calcBJValue(blackjack.user_cards) == 21) {
+          await userData.update(
+            { id: user.id },
+            {
+              $inc: { gold: Math.round(2.5 * blackjack.bet), blackjack_bjs: 1 },
+            }
+          );
           user.gold += Math.round(2.5 * blackjack.bet);
           msg =
             "\n\nBlackjack! Congratulations!\n\nTo play again use !bet <ammount>";
           blackjack.active = 0;
-
           message.channel.send(
             await blackjackEmbed(blackjack, msg, user, client)
           );
@@ -311,6 +321,10 @@ async function blackjack(message, args, user, db, req, fs, client) {
       ) {
         msg = "\n\nYou won, congrats! To play again use !bet <ammount>";
         user.gold += blackjack.bet * 2;
+        await userData.update(
+          { id: user.id },
+          { $inc: { gold: blackjack.bet * 2 } }
+        );
         user.blackjack_wins += 1;
         blackjack.active = 0;
         message.channel.send(
@@ -320,6 +334,10 @@ async function blackjack(message, args, user, db, req, fs, client) {
         calcBJValue(blackjack.dealer_cards) == calcBJValue(blackjack.user_cards)
       ) {
         msg = "\n\nTie! Better than nothing! To play again use !bet <ammount>";
+        await userData.update(
+          { id: user.id },
+          { $inc: { gold: blackjack.bet } }
+        );
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
         blackjack.active = 0;
@@ -396,6 +414,10 @@ async function blackjack(message, args, user, db, req, fs, client) {
       card = getRandomInt(0, blackjack.deck.length - 1);
       blackjack.user_cards.push(blackjack.deck[card]);
       blackjack.deck.splice(card, 1);
+      await userData.update(
+        { id: user.id },
+        { $inc: { gold: -blackjack.bet } }
+      );
       user.gold -= blackjack.bet;
       blackjack.bet = blackjack.bet + blackjack.bet;
 

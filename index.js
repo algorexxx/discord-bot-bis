@@ -5,6 +5,7 @@ const req = require("request");
 var fs = require("fs");
 var db = monk("localhost:27017/botbish");
 let userData = db.get("users");
+//userData.drop();
 const PREFIX = "!";
 
 const helpEmbed = require("./modules/help");
@@ -17,6 +18,7 @@ const rss = require("./modules/rss");
 const statsUpdate = require("./modules/statsUpdate");
 const coinflip = require("./modules/coinflip");
 const hangMan = require("./modules/hangman");
+const music = require("./modules/music");
 
 client.on("ready", () => {
   console.log("Bot started!");
@@ -118,6 +120,16 @@ client.on("message", async (message) => {
 
     case "hangman":
       message.channel.send(await hangMan.newGame());
+      break;
+    case "play":
+    case "skip":
+    case "stop":
+    case "queue":
+    case "pause":
+    case "resume":
+    case "nowplaying":
+    case "top":
+      await music(message, args, user, db, req, fs, client);
       break;
   }
 });
