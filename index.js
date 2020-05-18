@@ -16,6 +16,7 @@ const blackjack = require("./modules/blackjack");
 const rss = require("./modules/rss");
 const statsUpdate = require("./modules/statsUpdate");
 const coinflip = require("./modules/coinflip");
+const hangMan = require("./modules/hangman");
 
 client.on("ready", () => {
   console.log("Bot started!");
@@ -107,6 +108,16 @@ client.on("message", async (message) => {
     case "join":
     case "cancel":
       await coinflip(message, args, user, db, req, fs, client);
+      break;
+    case "guess":
+      if (!args[1]) return;
+      message.channel.send(
+        await hangMan.guess(args[1].substring(0, 1), message.author.id, db)
+      );
+      break;
+
+    case "hangman":
+      message.channel.send(await hangMan.newGame());
       break;
   }
 });
