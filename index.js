@@ -58,6 +58,8 @@ client.on("message", async (message) => {
   user.active = true;
   if (message.content.startsWith("ping")) {
     message.channel.send("pong!");
+  } else if (message.content.startsWith("!bitconn")) {
+    message.channel.send("https://www.youtube.com/watch?v=e5nyQmaq4k4");
   }
 
   if (!message.content.startsWith(PREFIX)) return;
