@@ -452,6 +452,10 @@ async function blackjack(message, args, user, db, req, fs, client) {
         msg = "\n\nYou won, congrats! To play again use !bet <ammount>";
         user.gold += blackjack.bet * 2;
         user.blackjack_wins += 1;
+        await userData.update(
+          { id: user.id },
+          { $inc: { gold: blackjack.bet * 2, blackjack_wins: 1 } }
+        );
         blackjack.active = 0;
         message.channel.send(
           await blackjackEmbed(blackjack, msg, user, client)
