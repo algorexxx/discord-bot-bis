@@ -214,7 +214,7 @@ async function music(message, args, user, db, req, fs, client) {
     case "pause":
       await userData.update({ id: user.id }, { $inc: { gold: -10 } });
       dispatcher.pause();
-      message.channel.send("Song skipped for " + 10 + " gold.");
+      message.channel.send("Music paused for " + 10 + " gold.");
       break;
     case "resume":
       await userData.update({ id: user.id }, { $inc: { gold: -5 } });
