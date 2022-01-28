@@ -1,54 +1,37 @@
-async function statsUpdate(db, req, fs, client) {
+const {getUser} = require("./services/userService");
+
+async function statsUpdate(db, client) {
   const userData = db.get("users");
 
-  // Runs every 3 minutes 20 gold
-  client.guilds.cache
-    .get("426479768947654659")
-    .members.cache.forEach(async function (member) {
-      let mem = await userData.findOne({ id: member.user.id });
-      if (!mem) {
-        mem = {
-          id: member.user.id,
-          gold: 1000,
-          online_mins: 0,
-          music_reqs: 0,
-          music_skips: 0,
-          music_stops: 0,
-          eb_added: 0,
-          eb_watched: 0,
-          heb_added: 0,
-          heb_watched: 0,
-          coinflips_won: 0,
-          coinflips_lost: 0,
-          fun_added: 0,
-          fun_watched: 0,
-          blackjack_hands: 0,
-          blackjack_wins: 0,
-          blackjack_bjs: 0,
-          blackjack_ties: 0,
-          active: false,
-        };
-      }
+  const guild = await client.guilds.fetch("426479768947654659");
+  const members = await guild.members.fetch();
 
-      if (mem.active) {
-        mem.gold += 10;
-        mem.active = false;
-      }
+  const memberIds = Array.from(members.keys());
 
-      if (member.voice.channel) {
-        if (member.voice.channelID != "436459953570578432") {
-          console.log(mem.id + " -  was given 20 for being in voice chat.");
-          mem.gold += 20;
-          mem.online_mins += 3;
-        }
-      }
+  for (let i = 0; i<memberIds.length; i++){
+    const member = members.get(memberIds[i]);
+    console.log(member.id);
+    const user = await getUser(member.user.id, userData);
 
-      await userData.update(
-        { id: member.user.id },
-        { $set: mem },
-        { upsert: true }
-      );
-    });
+    if (user.active) {
+      user.gold += 10;
+      user.active = false;
+    }
+
+    if (member.voice.channel) {
+      if (member.voice.channelID != "436459953570578432") {
+        console.log(user.id + " -  was given 20 for being in voice chat.");
+        user.gold += 20;
+        user.online_mins += 3;
+      }
+    }
+
+    await userData.update(
+      { id: member.user.id },
+      { $set: user },
+      { upsert: true }
+    );
+  }
 }
 
 module.exports = statsUpdate;
