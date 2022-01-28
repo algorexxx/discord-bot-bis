@@ -35,7 +35,7 @@ const defaultUser = {
   async function getUser(userId, userData){
     const user = await userData.findOne({ id: userId });
     if (user){
-      await userData.update({ id: userId },{ $set: {active = true} },{ upsert: true });
+      await userData.update({ id: userId },{ $set: {active: true} },{ upsert: true });
       return user;
     }
     
