@@ -10,7 +10,6 @@ async function statsUpdate(db, client) {
 
   for (let i = 0; i<memberIds.length; i++){
     const member = members.get(memberIds[i]);
-    console.log(member.id);
     const user = await getUser(member.user.id, userData);
 
     if (user.active) {
