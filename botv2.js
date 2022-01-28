@@ -6,29 +6,33 @@ const userData = db.get("users");
 
 const {heb, rheb} = require("./modules/commands/hotEyeBleach");
 const {getUser} = require("./modules/services/userService");
-const statsUpdate = require("./modules/statsUpdate");
+const stats = require('./modules/commands/stats');
+const statsUpdate = require("./modules/utilities/statsUpdate");
 
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+    console.log(`Logged in as ${client.user.tag}!`);
 });
 
 client.on('interactionCreate', async interaction => {
-  if (!interaction.isCommand()) return;
+    if (!interaction.isCommand()) return;
 
-  const user = await getUser(interaction.user.id, userData);
+    const user = await getUser(interaction.user.id, userData);
 
-  switch (interaction.commandName) {
-    case "heb":
-        const isPg13Channel = interaction.channel == (await client.channels.fetch("434824496856301591"));
-        if (isPg13Channel) {
-            interaction.reply("Psst, not here.. ;)\n");
-            return;
-          }
-          interaction.reply(await heb(interaction.options.getString('imgurl'), user, db, client));
-          break;
-    case "rheb":
-        interaction.reply(await rheb(interaction.options.getString('imgid'), user, db));
-        break;
+    switch (interaction.commandName) {
+        case "heb":
+            const isPg13Channel = interaction.channel == (await client.channels.fetch("434824496856301591"));
+            if (isPg13Channel) {
+                interaction.reply("Psst, not here.. ;)\n");
+                return;
+            }
+            interaction.reply(await heb(interaction.options.getString('imgurl'), user, db, client));
+            break;
+        case "rheb":
+            interaction.reply(await rheb(interaction.options.getString('imgid'), user, db));
+            break;
+        case "stats":
+            interaction.reply(await stats(interaction.options.getString('username'), user, db, client));
+            break;
     }
 });
 
