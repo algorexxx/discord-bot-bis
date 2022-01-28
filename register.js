@@ -12,7 +12,12 @@ const rheb = new SlashCommandBuilder()
 	.setDescription('remove hot eye bleach')
 	.addStringOption(option => option.setName('imgid').setDescription('Enter a string'));
 
-const commands = [heb, rheb]; 
+const stats = new SlashCommandBuilder()
+	.setName('stats')
+	.setDescription('statistics')
+	.addStringOption(option => option.setName('username').setDescription('Enter a string'));
+
+const commands = [heb, rheb, stats]; 
 
 const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN);
 

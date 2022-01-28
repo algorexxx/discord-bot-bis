@@ -1,4 +1,4 @@
-const {getUser} = require("./services/userService");
+const {getUser} = require("../services/userService");
 
 async function statsUpdate(db, client) {
   const userData = db.get("users");
