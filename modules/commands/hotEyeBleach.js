@@ -1,5 +1,5 @@
-const imageEmbed = require("./image");
-const download = require("./download");
+const imageEmbed = require("../utilities/image");
+const download = require("../utilities/download");
 const req = require("request");
 var fs = require("fs");
 

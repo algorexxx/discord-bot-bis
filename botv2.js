@@ -1,11 +1,12 @@
 const { Client, Intents } = require('discord.js');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 const monk = require("monk");
-var db = monk("localhost:27017/botbish");
-let userData = db.get("users");
+const db = monk("localhost:27017/botbish");
 
-const {heb, rheb} = require("./modules/hotEyeBleach");
-const {defaultUser, createNewUser} = require("./modules/defaultUser");
+const userData = db.get("users");
+
+const {heb, rheb} = require("./modules/commands/hotEyeBleach");
+const {getUser} = require("./modules/services/userService");
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -14,8 +15,7 @@ client.on('ready', () => {
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
-  let user = await userData.findOne({ id: interaction.user.id }) || await createNewUser(userData);
-  user.active = true;
+  const user = await getUser(interaction.user.id, userData);
 
   switch (interaction.commandName) {
     case "heb":

@@ -1,5 +1,4 @@
 const defaultUser = {
-    id: interaction.user.id,
     gold: 1000,
     online_mins: 0,
     music_reqs: 0,
@@ -20,11 +19,12 @@ const defaultUser = {
     active: true,
   };
 
-  async function createNewUser(userData){
+  async function createNewUser(userId, userData){
       const user = defaultUser;
+      user.id = userId;
 
       await userData.update(
-        { id: interaction.user.id },
+        { id: userId },
         { $set: user },
         { upsert: true }
       );
@@ -32,4 +32,14 @@ const defaultUser = {
       return user;
   }
 
-  module.exports = {defaultUser: defaultUser, createNewUser: createNewUser};
+  async function getUser(userId, userData){
+    const user = await userData.findOne({ id: userId });
+    if (user){
+      await userData.update({ id: userId },{ $set: {active = true} },{ upsert: true });
+      return user;
+    }
+    
+    return await createNewUser(userId, userData);
+  }
+
+  module.exports = {defaultUser: defaultUser, createNewUser: createNewUser, getUser: getUser};
