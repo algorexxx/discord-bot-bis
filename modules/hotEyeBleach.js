@@ -1,73 +1,68 @@
 const imageEmbed = require("./image");
 const download = require("./download");
+const req = require("request");
+var fs = require("fs");
 
-async function eyeBleach(message, args, user, db, req, fs, client) {
+async function heb(imageUrl, user, db, client) {
   const eyeBleachData = db.get("hoteyebleach");
   const userData = db.get("users");
-  if (args[0] === "heb") {
-    if (!args[1]) {
+
+    if (!imageUrl) {
       let ebs = await eyeBleachData.find({});
       if (ebs.length <= 0) {
-        console.log("No hot eyebleach found");
-        return;
+        return "No hot eyebleach found";
       } else {
         let display_image = ebs[getRandomInt(0, ebs.length - 1)];
         let owner = (await client.users.fetch(display_image.owner)).username;
-        message.channel.send(
-          await imageEmbed(
-            display_image,
-            owner,
-            "Hot Eyebleach",
-            "https://i.imgur.com/lkjaG2p.png",
-            db
-          )
-        );
         user.heb_watched += 1;
+        const embed = await imageEmbed(display_image, owner, "Hot Eyebleach", "https://i.imgur.com/lkjaG2p.png");
+        return {embeds: [embed]};
       }
     } else {
-      let found = await eyeBleachData.findOne({ url: args[1] });
+      let found = await eyeBleachData.findOne({ url: imageUrl });
 
       if (found) {
-        message.channel.send("Duplicate image, try another one!");
-        return;
+        return "Duplicate image, try another one!";
       }
 
       let lastEb = await eyeBleachData.findOne({}, { sort: { id: -1 } });
       let newID = ((lastEb || {}).id || 0) + 1;
 
       download(
-        args[1],
+        imageUrl,
         "./images/heb/" + newID,
         async function (res) {
           if (!res) {
             await eyeBleachData.update(
               { id: newID },
-              { $set: { id: newID, url: args[1], owner: message.author.id } },
+              { $set: { id: newID, url: imageUrl, owner: user.id } },
               { upsert: true }
             );
-            message.channel.send("Image added to hot eyebleach!");
             await userData.update(
               { id: user.id },
               { $inc: { gold: 100, heb_added: 1 } }
             );
+            console.log("image downloaded");
           } else {
-            message.channel.send(res);
-          }
-        },
-        req,
-        fs
-      );
+            console.log(res); 
+          }}, req, fs);
+
+      return "Image added to hot eyebleach!";
     }
-  } else if (args[0] === "rheb") {
-    if (message.author.id === process.env.ADMIN_ID && args[1]) {
-      let ebrm = await eyeBleachData.findOne({ id: parseInt(args[1]) });
+}
+
+async function rheb(imageId, user, db) {
+  const eyeBleachData = db.get("hoteyebleach");
+  const userData = db.get("users");
+    if (user.id === process.env.DISCORD_ADMIN_ID && imageId) {
+      let ebrm = await eyeBleachData.findOne({ id: parseInt(imageId) });
 
       if (!ebrm) {
-        message.channel.send("ID: " + args[1] + "does not exist.");
+        return "ID: " + imageId + "does not exist.";
       } else {
         await userData.update(
           { id: ebrm.owner },
-          { $inc: { gold: -150, fun_added: -1 } }
+          { $inc: { gold: -150, heb_added: -1 } }
         );
 
         var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,6}\b(\/.*(jpg|jpeg|png|gif|bmp))/gi;
@@ -77,23 +72,24 @@ async function eyeBleach(message, args, user, db, req, fs, client) {
           if (match[2] == "jpg") filetype = "jpeg";
           else filetype = match[2];
 
-          fs.unlink("./images/heb/" + args[1] + "." + filetype, function () {
+          fs.unlink("./images/heb/" + imageId + "." + filetype, function () {
             console.log("remove done");
           });
         }
 
         await eyeBleachData.remove({ id: ebrm.id });
 
-        message.channel.send(
-          "fun image with id: " + args[1] + " has been removed."
-        );
+        return "fun image with id: " + imageId + " has been removed.";
+
       }
     }
-  }
 }
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-module.exports = eyeBleach;
+module.exports = {
+  heb: heb,
+  rheb: rheb,
+};

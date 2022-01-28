@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/ernyx/discord-bot-bis#readme",
   "dependencies": {
-    "discord.js": "^12.2.0",
+    "@discordjs/rest": "^0.3.0",
+    "discord-api-types": "^0.26.1",
+    "discord.js": "^13.6.0",
     "monk": "^7.3.0",
     "node-opus": "^0.3.3",
     "nodemon": "^2.0.4",
