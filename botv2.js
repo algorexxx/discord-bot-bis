@@ -9,6 +9,7 @@ const {heb, rheb} = require("./modules/commands/hotEyeBleach");
 const fun = require("./modules/commands/fun");
 const coinflip = require("./modules/commands/coinflip");
 const blackjack = require("./modules/commands/blackjack");
+const hangMan = require("./modules/commands/hangman/hangman");
 const eyeBleach = require("./modules/commands/eyeBleach");
 const {getUser} = require("./modules/services/userService");
 const backup = require("./modules/services/backup");
@@ -102,6 +103,15 @@ client.on("messageCreate", async message => {
         case "join":
         case "cancel":
             await coinflip(message, command, arguments[0], user, db, client);
+            break;
+        case "guess":
+            if (!arguments[0]) return;
+            message.reply(
+                await hangMan.guess(arguments[0].substring(0, 1), message.author.id, db)
+            );
+            break;
+        case "hangman":
+            message.reply(await hangMan.newGame());
             break;
         case "backup":
             await backup(db);

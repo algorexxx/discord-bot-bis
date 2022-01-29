@@ -1,3 +1,4 @@
+const getRandomInt = require("../../utilities/getRandomInt");
 const hangman_words = require("./hangmanwords.json").words;
 const hangmanEmbed = require("./hangmanEmbed");
 var hangMan = {
@@ -88,9 +89,5 @@ var hangMan = {
     }
   },
 };
-
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
 
 module.exports = hangMan;
