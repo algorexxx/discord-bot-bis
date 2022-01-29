@@ -6,7 +6,7 @@ var fs = require("fs");
 async function fun(message, command, args, user, db, client) {
   const eyeBleachData = db.get("fun");
   const userData = db.get("users");
-  console.log(command);
+
   if (command === "fun") {
     if (!args) {
       let ebs = await eyeBleachData.find({});
