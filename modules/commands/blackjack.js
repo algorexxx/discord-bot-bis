@@ -17,11 +17,11 @@ const card_value_strings = [
   ":regional_indicator_a:",
 ];
 
-async function blackjack(message, args, user, db, req, fs, client) {
+async function blackjack(message, command, argument, user, db, client) {
   let blackjack;
   const blackjackData = db.get("blackjacks");
   const userData = db.get("users");
-  switch (args[0].toLowerCase()) {
+  switch (command.toLowerCase()) {
     case "blackjack":
       if (
         message.channel.id !=
@@ -29,7 +29,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
           .get("426479768947654659")
           .channels.cache.get("434825682007228457").id
       ) {
-        message.channel.send(
+        message.reply(
           "Please use the casino text channel for all gambling.\n"
         );
         return;
@@ -38,18 +38,18 @@ async function blackjack(message, args, user, db, req, fs, client) {
       let bj = await blackjackData.findOne({ owner: user.id });
 
       if (!bj) {
-        message.channel.send(
+        message.reply(
           "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <ammount>"
         );
         return;
       }
       if (bj.bet == 0) {
-        message.channel.send(
+        message.reply(
           "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <ammount>"
         );
         return;
       } else {
-        message.channel.send(
+        message.reply(
           "You are already in a hand, scroll up to see your cards and options."
         );
         return;
@@ -62,7 +62,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
           .get("426479768947654659")
           .channels.cache.get("434825682007228457").id
       ) {
-        message.channel.send(
+        message.reply(
           "Please use the casino text channel for all gambling.\n"
         );
         return;
@@ -82,19 +82,19 @@ async function blackjack(message, args, user, db, req, fs, client) {
       }
 
       if (blackjack.bet !== 0) {
-        message.channel.send(
+        message.reply(
           "You have already made your bet. Use !blackjack to see what your next move is."
         );
         return;
       }
 
-      if (!parseInt(args[1]) || parseInt(args[1]) < 1) {
-        message.channel.send("Invalid bet ammount, please try again.");
+      if (!parseInt(argument) || parseInt(argument) < 1) {
+        message.reply("Invalid bet ammount, please try again.");
         return;
       }
 
-      if (parseInt(args[1]) > user.gold) {
-        message.channel.send(
+      if (parseInt(argument) > user.gold) {
+        message.reply(
           "You cannot afford to bet this much, you only have " +
             user.gold +
             " gold."
@@ -127,13 +127,13 @@ async function blackjack(message, args, user, db, req, fs, client) {
           blackjack.deck.splice(card, 1);
         }
 
-        blackjack.bet = parseInt(args[1]);
+        blackjack.bet = parseInt(argument);
         blackjack.active = 1;
-        user.gold -= parseInt(args[1]);
+        user.gold -= parseInt(argument);
         user.blackjack_hands += 1;
         await userData.update(
           { id: user.id },
-          { $inc: { gold: -parseInt(args[1]), blackjack_hands: 1 } }
+          { $inc: { gold: -parseInt(argument), blackjack_hands: 1 } }
         );
 
         msg =
@@ -164,7 +164,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
           msg =
             "\n\nBlackjack! Congratulations!\n\nTo play again use !bet <ammount>";
           blackjack.active = 0;
-          message.channel.send(
+          message.reply(
             await blackjackEmbed(blackjack, msg, user, client)
           );
           blackjack.user_cards.length = 0;
@@ -176,12 +176,12 @@ async function blackjack(message, args, user, db, req, fs, client) {
           calcBJValue(blackjack.user_cards) < 12
         ) {
           msg = "\n\nDo you want to !hit, !stand or !double?";
-          message.channel.send(
+          message.reply(
             await blackjackEmbed(blackjack, msg, user, client)
           );
         } else {
           msg = "\n\nDo you want to !hit or !stand?";
-          message.channel.send(
+          message.reply(
             await blackjackEmbed(blackjack, msg, user, client)
           );
         }
@@ -201,7 +201,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
           .get("426479768947654659")
           .channels.cache.get("434825682007228457").id
       ) {
-        message.channel.send(
+        message.reply(
           "Please use the casino text channel for all gambling.\n"
         );
         return;
@@ -209,13 +209,13 @@ async function blackjack(message, args, user, db, req, fs, client) {
 
       blackjack = await blackjackData.findOne({ owner: user.id });
       if (!blackjack) {
-        message.channel.send(
+        message.reply(
           "You have no active blackjack game. Use !blackjack to start one."
         );
         return;
       }
       if (blackjack.bet == 0) {
-        message.channel.send("You need to bet before you hit.");
+        message.reply("You need to bet before you hit.");
         return;
       }
 
@@ -242,7 +242,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
       msg += " [" + calcBJValue(blackjack.user_cards) + "]";
       if (calcBJValue(blackjack.user_cards) < 22) {
         msg = "\n\nDo you want to !hit or !stand?";
-        message.channel.send(
+        message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
       } else {
@@ -250,7 +250,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
           "\n\nBust! Better luck next time. To play again use !bet <ammount>";
 
         blackjack.active = 0;
-        message.channel.send(
+        message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
         blackjack.user_cards.length = 0;
@@ -272,7 +272,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
           .get("426479768947654659")
           .channels.cache.get("434825682007228457").id
       ) {
-        message.channel.send(
+        message.reply(
           "Please use the casino text channel for all gambling.\n"
         );
         return;
@@ -281,13 +281,13 @@ async function blackjack(message, args, user, db, req, fs, client) {
       blackjack = await blackjackData.findOne({ owner: user.id });
 
       if (!blackjack) {
-        message.channel.send(
+        message.reply(
           "You have no active blackjack game. Use !blackjack to start one."
         );
         return;
       }
       if (blackjack.bet == 0) {
-        message.channel.send("You need to bet before you stand.");
+        message.reply("You need to bet before you stand.");
         return;
       }
 
@@ -327,7 +327,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
         );
         user.blackjack_wins += 1;
         blackjack.active = 0;
-        message.channel.send(
+        message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
       } else if (
@@ -341,14 +341,14 @@ async function blackjack(message, args, user, db, req, fs, client) {
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
         blackjack.active = 0;
-        message.channel.send(
+        message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
       } else {
         msg =
           "\n\nYou lost, better luck next time. To play again use !bet <ammount>";
         blackjack.active = 0;
-        message.channel.send(
+        message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
       }
@@ -372,7 +372,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
           .get("426479768947654659")
           .channels.cache.get("434825682007228457").id
       ) {
-        message.channel.send(
+        message.reply(
           "Please use the casino text channel for all gambling.\n"
         );
         return;
@@ -381,13 +381,13 @@ async function blackjack(message, args, user, db, req, fs, client) {
       blackjack = await blackjackData.findOne({ owner: user.id });
 
       if (!blackjack) {
-        message.channel.send(
+        message.reply(
           "You have no active blackjack game. Use !blackjack to start one."
         );
         return;
       }
       if (blackjack.bet == 0) {
-        message.channel.send("You need to bet before you double.");
+        message.reply("You need to bet before you double.");
         return;
       }
 
@@ -396,12 +396,12 @@ async function blackjack(message, args, user, db, req, fs, client) {
         calcBJValue(blackjack.user_cards) > 11 ||
         blackjack.user_cards.length > 2
       ) {
-        message.channel.send("Eh you can't double. !hit or !stand maybe?");
+        message.reply("Eh you can't double. !hit or !stand maybe?");
         return;
       }
 
       if (blackjack.bet > user.gold) {
-        message.channel.send(
+        message.reply(
           "You cant afford to !double. Need: " +
             blackjack.bet +
             " gold, have: " +
@@ -457,7 +457,7 @@ async function blackjack(message, args, user, db, req, fs, client) {
           { $inc: { gold: blackjack.bet * 2, blackjack_wins: 1 } }
         );
         blackjack.active = 0;
-        message.channel.send(
+        message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
       } else if (
@@ -467,14 +467,14 @@ async function blackjack(message, args, user, db, req, fs, client) {
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
         blackjack.active = 0;
-        message.channel.send(
+        message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
       } else {
         msg =
           "\n\nYou lost, better luck next time. To play again use !bet <ammount>";
         blackjack.active = 0;
-        message.channel.send(
+        message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
       }
@@ -551,43 +551,19 @@ async function blackjackEmbed(game, description, user, client) {
   }
   let owner = (await client.users.fetch(game.owner)).username;
 
-  var blackjack_embed = {
-    embed: {
-      description: "\nBet: " + game.bet + "\n",
-      color: 596092,
-      footer: {
-        icon_url:
-          "https://cdn4.iconfinder.com/data/icons/casino-general/512/Stack_of_Cards-512.png",
-        text: "Cards Remaining: " + game.deck.length + " | Gold: " + user.gold,
-      },
-      thumbnail: {
-        url:
-          "http://www.smapyren.se/wp-content/uploads/2018/01/casino-blackjack.png",
-      },
-      author: {
-        name: owner + "'s Blackjack Table",
-        icon_url:
-          "https://images-na.ssl-images-amazon.com/images/I/81w49Xr-7QL.png",
-      },
-      fields: [
-        {
-          name: "Your hand:",
-          value: user_cards + "\nValue: " + calcBJValue(game.user_cards) + "\n",
-          inline: true,
-        },
-        {
-          name: "Dealer Hand",
-          value: dealer_cards + "\nValue: " + dealer_value,
-          inline: true,
-        },
-        {
-          name: "\n" + title,
-          value: description,
-        },
-      ],
-    },
-  };
-  return blackjack_embed;
+  const { MessageEmbed } = require('discord.js');
+
+  return { embeds: [new MessageEmbed()
+      .setColor('#09187C')
+      .setAuthor({ name: owner + "'s Blackjack Table", iconURL: "https://images-na.ssl-images-amazon.com/images/I/81w49Xr-7QL.png" })
+      .setDescription("\nBet: " + game.bet + "\n")
+      .setThumbnail('http://www.smapyren.se/wp-content/uploads/2018/01/casino-blackjack.png')
+      .addFields(
+        { name: 'Your hand:', value: user_cards + "\nValue: " + calcBJValue(game.user_cards) + "\n", inline: true },
+        { name: 'Dealer Hand', value: dealer_cards + "\nValue: " + dealer_value, inline: true },
+        { name: "\n" + title, value: description }
+      )
+      .setFooter({ text: "Cards Remaining: " + game.deck.length + " | Gold: " + user.gold, iconURL: 'https://cdn4.iconfinder.com/data/icons/casino-general/512/Stack_of_Cards-512.png' })]};
 }
 
 module.exports = blackjack;
