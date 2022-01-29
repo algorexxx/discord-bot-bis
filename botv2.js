@@ -3,6 +3,7 @@ const client = new Client({ intents: new Intents(32767) });
 const monk = require("monk");
 const db = monk("localhost:27017/botbish");
 const userData = db.get("users");
+const PREFIX = "!";
 
 const {heb, rheb} = require("./modules/commands/hotEyeBleach");
 const {getUser} = require("./modules/services/userService");
@@ -32,6 +33,38 @@ client.on('interactionCreate', async interaction => {
             break;
         case "stats":
             interaction.reply(await stats(interaction.options.getString('username'), user, db, client));
+            break;
+    }
+});
+
+client.on("messageCreate", async message => { 
+    if (message.content.toLowerCase().includes("bitco")) {
+        message.reply("https://www.youtube.com/watch?v=e5nyQmaq4k4");
+    }
+
+    if (!message.content.startsWith(PREFIX)) return;
+    const user = await getUser(message.author.id, userData);
+
+    const command = message.content.substring(PREFIX.length).split(" ")[0];
+    const arguments = message.content.substring(PREFIX.length).split(" ").slice(1);
+
+    switch (command) {
+        case "heb":
+            const isPg13Channel = message.channel == (await client.channels.fetch("434824496856301591"));
+            if (isPg13Channel) {
+                message.reply("Psst, not here.. ;)\n");
+                return;
+            }
+            const imageUrl = arguments[0];
+            message.reply(await heb(imageUrl, user, db, client));
+            break;
+        case "rheb":
+            const hebId = arguments[0];
+            message.reply(await rheb(hebId, user, db));
+            break;
+        case "stats":
+            const userSearchString = arguments[0];
+            message.reply(await stats(userSearchString, user, db, client));
             break;
     }
 });
