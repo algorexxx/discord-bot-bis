@@ -15,6 +15,10 @@ async function backup(db) {
     { data: await songData.find({}), name: "songs" },
   ];
 
+  if (!fs.existsSync('./olddb')){
+    fs.mkdirSync('./olddb', { recursive: true });
+  }
+
   // stringify JSON Object
   data.forEach(function (d) {
     var jsonContent = JSON.stringify(d.data);
