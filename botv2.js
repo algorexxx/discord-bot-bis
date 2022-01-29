@@ -6,9 +6,11 @@ const userData = db.get("users");
 const PREFIX = "!";
 
 const {heb, rheb} = require("./modules/commands/hotEyeBleach");
+const fun = require("./modules/commands/fun");
 const {getUser} = require("./modules/services/userService");
 const stats = require('./modules/commands/stats');
 const statsUpdate = require("./modules/utilities/statsUpdate");
+const helpEmbed = require("./modules/utilities/helpEmbed");
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -49,6 +51,9 @@ client.on("messageCreate", async message => {
     const arguments = message.content.substring(PREFIX.length).split(" ").slice(1);
 
     switch (command) {
+        case "help":
+            message.reply({embeds: [helpEmbed()]});
+            break;
         case "heb":
             const isPg13Channel = message.channel == (await client.channels.fetch("434824496856301591"));
             if (isPg13Channel) {
@@ -61,6 +66,10 @@ client.on("messageCreate", async message => {
         case "rheb":
             const hebId = arguments[0];
             message.reply(await rheb(hebId, user, db));
+            break;
+        case "fun":
+        case "rfun":
+            await fun(message, command, arguments[0], user, db, client);
             break;
         case "stats":
             const userSearchString = arguments[0];

@@ -1,6 +1,6 @@
 const imageEmbed = require("../utilities/image");
 const download = require("../utilities/download");
-const req = require("request");
+const getRandomInt = require("../utilities/getRandomInt");
 var fs = require("fs");
 
 async function heb(imageUrl, user, db, client) {
@@ -45,7 +45,7 @@ async function heb(imageUrl, user, db, client) {
             console.log("image downloaded");
           } else {
             console.log(res); 
-          }}, req, fs);
+          }});
 
       return "Image added to hot eyebleach!";
     }
@@ -83,10 +83,6 @@ async function rheb(imageId, user, db) {
 
       }
     }
-}
-
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 module.exports = {

@@ -1,69 +1,68 @@
-const imageEmbed = require("./image");
-const download = require("./download");
+const imageEmbed = require("../utilities/image");
+const getRandomInt = require("../utilities/getRandomInt");
+const download = require("../utilities/download");
+var fs = require("fs");
 
-async function fun(message, args, user, db, req, fs, client) {
+async function fun(message, command, args, user, db, client) {
   const eyeBleachData = db.get("fun");
   const userData = db.get("users");
-  if (args[0] === "fun") {
-    if (!args[1]) {
+  console.log(command);
+  if (command === "fun") {
+    if (!args) {
       let ebs = await eyeBleachData.find({});
       if (ebs.length <= 0) {
         console.log("No fun found");
+        message.reply("No fun found");
         return;
       } else {
         let display_image = ebs[getRandomInt(0, ebs.length - 1)];
         let owner = (await client.users.fetch(display_image.owner)).username;
         user.fun_watched += 1;
-        message.channel.send(
+        message.reply({embeds: [
           await imageEmbed(
             display_image,
             owner,
             "Fun omgwtflol",
             "https://pre00.deviantart.net/3e8d/th/pre/f/2015/031/5/b/foxy_lol_icon_by_lara_jazmin_prime-d8g66we.png",
             db
-          )
-        );
+          )]});
       }
     } else {
-      let found = await eyeBleachData.findOne({ url: args[1] });
+      let found = await eyeBleachData.findOne({ url: args });
 
       if (found) {
-        message.channel.send("Duplicate image, try another one!");
-        return;
+        message.reply("Duplicate image, try another one!");
       }
 
       let lastEb = await eyeBleachData.findOne({}, { sort: { id: -1 } });
       let newID = ((lastEb || {}).id || 0) + 1;
 
       download(
-        args[1],
+        args,
         "./images/fun/" + newID,
         async function (res) {
           if (!res) {
             await eyeBleachData.update(
               { id: newID },
-              { $set: { id: newID, url: args[1], owner: message.author.id } },
+              { $set: { id: newID, url: args, owner: message.author.id } },
               { upsert: true }
             );
-            message.channel.send("Image added to fun!");
+            message.reply("Image added to fun!");
             await userData.update(
               { id: user.id },
               { $inc: { gold: 100, fun_added: 1 } }
             );
           } else {
-            message.channel.send(res);
+            message.reply(res);
           }
-        },
-        req,
-        fs
+        }
       );
     }
-  } else if (args[0] === "rfun") {
-    if (message.author.id === process.env.ADMIN_ID && args[1]) {
-      let ebrm = await eyeBleachData.findOne({ id: parseInt(args[1]) });
-
+  } else if (command === "rfun") {
+    if (user.id === process.env.DISCORD_ADMIN_ID && args) {
+      let ebrm = await eyeBleachData.findOne({ id: parseInt(args) });
       if (!ebrm) {
-        message.channel.send("ID: " + args[1] + "does not exist.");
+        message.reply("ID: " + args + "does not exist.");
       } else {
         await userData.update(
           { id: ebrm.owner },
@@ -77,23 +76,19 @@ async function fun(message, args, user, db, req, fs, client) {
           if (match[2] == "jpg") filetype = "jpeg";
           else filetype = match[2];
 
-          fs.unlink("./images/fun/" + args[1] + "." + filetype, function () {
+          fs.unlink("./images/fun/" + args + "." + filetype, function () {
             console.log("remove done");
           });
         }
 
         await eyeBleachData.remove({ id: ebrm.id });
 
-        message.channel.send(
-          "fun image with id: " + args[1] + " has been removed."
+        message.reply(
+          "fun image with id: " + args + " has been removed."
         );
       }
     }
   }
-}
-
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 module.exports = fun;
