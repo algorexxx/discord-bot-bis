@@ -13,6 +13,7 @@ const backup = require("./modules/services/backup");
 const stats = require('./modules/commands/stats');
 const statsUpdate = require("./modules/utilities/statsUpdate");
 const helpEmbed = require("./modules/utilities/helpEmbed");
+const rss = require('./modules/services/rss');
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
@@ -98,3 +99,11 @@ client.login(process.env.DISCORD_TOKEN);
 
 setInterval(function () { statsUpdate(db, client); }, 180000);
 setInterval(function () { backup(db); }, 86400000);
+setInterval(function () { rss(db, client); }, 600000);
+
+client.on("guildMemberAdd", (member) => {
+    member.send(`Welcome, ${member}. DM emil hjelm for nudes`);
+  
+    var role = member.guild.roles.cache.find((role) => role.name === "loverbois");
+    member.roles.add(role.id);
+});
