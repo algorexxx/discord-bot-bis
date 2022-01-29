@@ -9,6 +9,7 @@ const {heb, rheb} = require("./modules/commands/hotEyeBleach");
 const fun = require("./modules/commands/fun");
 const eyeBleach = require("./modules/commands/eyeBleach");
 const {getUser} = require("./modules/services/userService");
+const backup = require("./modules/services/backup");
 const stats = require('./modules/commands/stats');
 const statsUpdate = require("./modules/utilities/statsUpdate");
 const helpEmbed = require("./modules/utilities/helpEmbed");
@@ -77,9 +78,18 @@ client.on("messageCreate", async message => {
         case "rfun":
             await fun(message, command, arguments[0], user, db, client);
             break;
+        case "gold":
+            message.reply("You have: " + user.gold + " gold.");
+            break;
         case "stats":
             const userSearchString = arguments[0];
             message.reply(await stats(userSearchString, user, db, client));
+            break;
+        case "cock":
+            message.reply("https://media.discordapp.net/attachments/427214398558306304/432283893065056275/alexsexy.png");
+            break;
+        case "backup":
+            await backup(db);
             break;
     }
 });
@@ -87,3 +97,4 @@ client.on("messageCreate", async message => {
 client.login(process.env.DISCORD_TOKEN);
 
 setInterval(function () { statsUpdate(db, client); }, 180000);
+setInterval(function () { backup(db); }, 86400000);
