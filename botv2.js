@@ -8,6 +8,7 @@ const PREFIX = "!";
 const {heb, rheb} = require("./modules/commands/hotEyeBleach");
 const fun = require("./modules/commands/fun");
 const coinflip = require("./modules/commands/coinflip");
+const blackjack = require("./modules/commands/blackjack");
 const eyeBleach = require("./modules/commands/eyeBleach");
 const {getUser} = require("./modules/services/userService");
 const backup = require("./modules/services/backup");
@@ -89,6 +90,13 @@ client.on("messageCreate", async message => {
             break;
         case "cock":
             message.reply("https://media.discordapp.net/attachments/427214398558306304/432283893065056275/alexsexy.png");
+            break;
+        case "blackjack":
+        case "bet":
+        case "hit":
+        case "stand":
+        case "double":
+            await blackjack(message, command, arguments[0], user, db, client);
             break;
         case "coinflip":
         case "join":
