@@ -40,13 +40,13 @@ async function blackjacko(message, command, argument, user, db, client) {
 
       if (!bj) {
         message.reply(
-          "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <ammount>"
+          "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <amount>"
         );
         return;
       }
       if (bj.bet == 0) {
         message.reply(
-          "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <ammount>"
+          "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <amount>"
         );
         return;
       } else {
@@ -90,11 +90,11 @@ async function blackjacko(message, command, argument, user, db, client) {
       }
 
       if (!parseInt(argument) || parseInt(argument) < 1) {
-        message.reply("Invalid bet ammount, please try again.");
+        message.reply("Invalid bet amount, please try again.");
         return;
       }
 
-      if (parseInt(argument) > user.gold && false) {
+      if (parseInt(argument) > user.gold) {
         message.reply(
           "You cannot afford to bet this much, you only have " +
             user.gold +
@@ -163,7 +163,7 @@ async function blackjacko(message, command, argument, user, db, client) {
           );
           user.gold += Math.round(2.5 * blackjack.bet);
           msg =
-            "\n\nBlackjack! Congratulations!\n\nTo play again use !bet <ammount>";
+            "\n\nBlackjack! Congratulations!\n\nTo play again use !bet <amount>";
           blackjack.active = 0;
           const reply = await message.reply(
             await blackjackEmbed(blackjack, msg, user, client)
@@ -272,7 +272,7 @@ async function blackjacko(message, command, argument, user, db, client) {
         };
         awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       } else {
-        msg = "\n\nBust! Better luck next time. To play again use !bet <ammount>";
+        msg = "\n\nBust! Better luck next time. To play again use !bet <amount>";
 
         blackjack.active = 0;
         const reply = await message.reply(
@@ -352,7 +352,7 @@ async function blackjacko(message, command, argument, user, db, client) {
         calcBJValue(blackjack.dealer_cards) > 21 ||
         calcBJValue(blackjack.dealer_cards) < calcBJValue(blackjack.user_cards)
       ) {
-        msg = "\n\nYou won, congrats! To play again use !bet <ammount>";
+        msg = "\n\nYou won, congrats! To play again use !bet <amount>";
         user.gold += blackjack.bet * 2;
         await userData.update(
           { id: user.id },
@@ -372,7 +372,7 @@ async function blackjacko(message, command, argument, user, db, client) {
       } else if (
         calcBJValue(blackjack.dealer_cards) == calcBJValue(blackjack.user_cards)
       ) {
-        msg = "\n\nTie! Better than nothing! To play again use !bet <ammount>";
+        msg = "\n\nTie! Better than nothing! To play again use !bet <amount>";
         await userData.update(
           { id: user.id },
           { $inc: { gold: blackjack.bet } }
@@ -391,7 +391,7 @@ async function blackjacko(message, command, argument, user, db, client) {
         awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       } else {
         msg =
-          "\n\nYou lost, better luck next time. To play again use !bet <ammount>";
+          "\n\nYou lost, better luck next time. To play again use !bet <amount>";
         blackjack.active = 0;
         const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
@@ -500,7 +500,7 @@ async function blackjacko(message, command, argument, user, db, client) {
         calcBJValue(blackjack.dealer_cards) > 21 ||
         calcBJValue(blackjack.dealer_cards) < calcBJValue(blackjack.user_cards)
       ) {
-        msg = "\n\nYou won, congrats! To play again use !bet <ammount>";
+        msg = "\n\nYou won, congrats! To play again use !bet <amount>";
         user.gold += blackjack.bet * 2;
         user.blackjack_wins += 1;
         await userData.update(
@@ -520,7 +520,7 @@ async function blackjacko(message, command, argument, user, db, client) {
       } else if (
         calcBJValue(blackjack.dealer_cards) == calcBJValue(blackjack.user_cards)
       ) {
-        msg = "\n\nTie! Better than nothing! To play again use !bet <ammount>";
+        msg = "\n\nTie! Better than nothing! To play again use !bet <amount>";
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
         await userData.update(
@@ -539,7 +539,7 @@ async function blackjacko(message, command, argument, user, db, client) {
         awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       } else {
         msg =
-          "\n\nYou lost, better luck next time. To play again use !bet <ammount>";
+          "\n\nYou lost, better luck next time. To play again use !bet <amount>";
         blackjack.active = 0;
         const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
