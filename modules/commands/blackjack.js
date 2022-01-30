@@ -466,6 +466,10 @@ async function blackjack(message, command, argument, user, db, client) {
         msg = "\n\nTie! Better than nothing! To play again use !bet <ammount>";
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
+        await userData.update(
+          { id: user.id },
+          { $inc: { gold: blackjack.bet, blackjack_ties: 1 } }
+        );
         blackjack.active = 0;
         message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
