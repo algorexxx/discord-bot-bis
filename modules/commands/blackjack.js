@@ -158,7 +158,7 @@ async function blackjacko(message, command, argument, user, db, client) {
             blackjack.user_cards[i].suit;
         }
         msg += " [" + calcBJValue(blackjack.user_cards) + "]";
-
+        oldBet = blackjack.bet;
         if (calcBJValue(blackjack.user_cards) == 21) {
           await userData.update(
             { id: user.id },
@@ -202,7 +202,7 @@ async function blackjacko(message, command, argument, user, db, client) {
         filter = (reaction, u) => {
           return buttons.includes(reaction.emoji.name) && u.id === user.id;
         };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        awaitReactions(message, reply, filter, user, db, client, oldBet);
         await applyButtons(reply, buttons);
       }
 
