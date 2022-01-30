@@ -19,7 +19,7 @@ const card_value_strings = [
 
 async function blackjacko(message, command, argument, user, db, client) {
   let blackjack;
-  console.log(command + " " + argument)
+
   const blackjackData = db.get("blackjacks");
   const userData = db.get("users");
   switch (command.toLowerCase()) {
