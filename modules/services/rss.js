@@ -49,7 +49,7 @@ function redditEmbed(item) {
   
   const embed = new MessageEmbed()
     .setColor('#03D3D4')
-    .setTitle(item.title)
+    .setTitle(item.title.substring(0,250) + "...")
     .setURL(item.link)
     .setAuthor({ name: 'CS:GO Reddit: New & Hot', iconURL: 'https://b.thumbs.redditmedia.com/g5eFUVT_1xS2OUI_uYxOGlZAsYHkLrq2Hhsz8Fnloes.png', url: 'https://www.reddit.com/r/GlobalOffensive/' })
     .setThumbnail(thumb_url)
