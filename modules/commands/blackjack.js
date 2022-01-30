@@ -22,6 +22,10 @@ async function blackjacko(message, command, argument, user, db, client) {
 
   const blackjackData = db.get("blackjacks");
   const userData = db.get("users");
+  let buttons;
+  let reply;
+  let filter;
+  let oldBet;
   switch (command.toLowerCase()) {
     case "blackjack":
       if (
@@ -154,6 +158,7 @@ async function blackjacko(message, command, argument, user, db, client) {
             blackjack.user_cards[i].suit;
         }
         msg += " [" + calcBJValue(blackjack.user_cards) + "]";
+
         if (calcBJValue(blackjack.user_cards) == 21) {
           await userData.update(
             { id: user.id },
@@ -165,15 +170,9 @@ async function blackjacko(message, command, argument, user, db, client) {
           msg =
             "\n\nBlackjack! Congratulations!\n\nTo play again use !bet <amount>";
           blackjack.active = 0;
-          const reply = await message.reply(
-            await blackjackEmbed(blackjack, msg, user, client)
-          );
-          const buttons = ['⤵️', '🔁', '⤴️'];
-        await applyButtons(reply, buttons);
-        const filter = (reaction, u) => {
-          return buttons.includes(reaction.emoji.name) && u.id === user.id;
-        };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
+        buttons = ['⤵️', '🔁', '⤴️'];
+        
           blackjack.user_cards.length = 0;
           blackjack.dealer_cards.length = 0;
           blackjack.bet = 0;
@@ -183,32 +182,28 @@ async function blackjacko(message, command, argument, user, db, client) {
           calcBJValue(blackjack.user_cards) < 12
         ) {
           msg = "\n\nDo you want to !hit, !stand or !double?";
-          const reply = await message.reply(
+          reply = await message.reply(
             await blackjackEmbed(blackjack, msg, user, client)
           );
-          const buttons = ['📥', '🛑', '🇩'];
-          await applyButtons(reply, buttons);
-          const filter = (reaction, u) => {
-            return buttons.includes(reaction.emoji.name) && u.id === user.id;
-          };
-          awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+          buttons = ['📥', '🛑', '🇩'];
         } else {
           msg = "\n\nDo you want to !hit or !stand?";
-          const reply = await message.reply(
+          reply = await message.reply(
             await blackjackEmbed(blackjack, msg, user, client)
           );
-          const buttons = ['📥', '🛑'];
-          await applyButtons(reply, buttons);
-          const filter = (reaction, u) => {
-            return buttons.includes(reaction.emoji.name) && u.id === user.id;
-          };
-          awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+          buttons = ['📥', '🛑'];
         }
         await blackjackData.update(
           { owner: user.id },
           { $set: blackjack },
           { upsert: true }
         );
+
+        filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        await applyButtons(reply, buttons);
       }
 
       break;
@@ -259,32 +254,17 @@ async function blackjacko(message, command, argument, user, db, client) {
           blackjack.user_cards[i].suit;
       }
       msg += " [" + calcBJValue(blackjack.user_cards) + "]";
+      oldBet = blackjack.bet;
       if (calcBJValue(blackjack.user_cards) < 22) {
         msg = "\n\nDo you want to !hit or !stand?";
-        const reply = await message.reply(
-          await blackjackEmbed(blackjack, msg, user, client)
-        );
-
-        const buttons = ['📥', '🛑'];
-        await applyButtons(reply, buttons);
-        const filter = (reaction, u) => {
-          return buttons.includes(reaction.emoji.name) && u.id === user.id;
-        };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
+        buttons = ['📥', '🛑'];
       } else {
         msg = "\n\nBust! Better luck next time. To play again use !bet <amount>";
 
         blackjack.active = 0;
-        const reply = await message.reply(
-          await blackjackEmbed(blackjack, msg, user, client)
-        );
-
-        const buttons = ['⤵️', '🔁', '⤴️'];
-        await applyButtons(reply, buttons);
-        const filter = (reaction, u) => {
-          return buttons.includes(reaction.emoji.name) && u.id === user.id;
-        };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
+        buttons = ['⤵️', '🔁', '⤴️'];
 
         blackjack.user_cards.length = 0;
         blackjack.dealer_cards.length = 0;
@@ -295,6 +275,12 @@ async function blackjacko(message, command, argument, user, db, client) {
         { $set: blackjack },
         { upsert: true }
       );
+
+      filter = (reaction, u) => {
+        return buttons.includes(reaction.emoji.name) && u.id === user.id;
+      };
+      awaitReactions(message, reply, filter, user, db, client, oldBet);
+      await applyButtons(reply, buttons);
 
       break;
 
@@ -348,6 +334,7 @@ async function blackjacko(message, command, argument, user, db, client) {
           blackjack.user_cards[i].suit;
       }
       msg += " [" + calcBJValue(blackjack.user_cards) + "]";
+
       if (
         calcBJValue(blackjack.dealer_cards) > 21 ||
         calcBJValue(blackjack.dealer_cards) < calcBJValue(blackjack.user_cards)
@@ -360,15 +347,8 @@ async function blackjacko(message, command, argument, user, db, client) {
         );
         user.blackjack_wins += 1;
         blackjack.active = 0;
-        const reply = await message.reply(
-          await blackjackEmbed(blackjack, msg, user, client)
-        );
-        const buttons = ['⤵️', '🔁', '⤴️'];
-        await applyButtons(reply, buttons);
-        const filter = (reaction, u) => {
-          return buttons.includes(reaction.emoji.name) && u.id === user.id;
-        };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
+        buttons = ['⤵️', '🔁', '⤴️'];
       } else if (
         calcBJValue(blackjack.dealer_cards) == calcBJValue(blackjack.user_cards)
       ) {
@@ -380,29 +360,16 @@ async function blackjacko(message, command, argument, user, db, client) {
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
         blackjack.active = 0;
-        const reply = await message.reply(
-          await blackjackEmbed(blackjack, msg, user, client)
-        );
-        const buttons = ['⤵️', '🔁', '⤴️'];
-        await applyButtons(reply, buttons);
-        const filter = (reaction, u) => {
-          return buttons.includes(reaction.emoji.name) && u.id === user.id;
-        };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
+        buttons = ['⤵️', '🔁', '⤴️'];
       } else {
         msg =
           "\n\nYou lost, better luck next time. To play again use !bet <amount>";
         blackjack.active = 0;
-        const reply = await message.reply(
-          await blackjackEmbed(blackjack, msg, user, client)
-        );
-        const buttons = ['⤵️', '🔁', '⤴️'];
-        await applyButtons(reply, buttons);
-        const filter = (reaction, u) => {
-          return buttons.includes(reaction.emoji.name) && u.id === user.id;
-        };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
+        buttons = ['⤵️', '🔁', '⤴️'];
       }
+      oldBet = blackjack.bet;
 
       blackjack.user_cards.length = 0;
       blackjack.dealer_cards.length = 0;
@@ -413,6 +380,12 @@ async function blackjacko(message, command, argument, user, db, client) {
         { $set: blackjack },
         { upsert: true }
       );
+
+      filter = (reaction, u) => {
+        return buttons.includes(reaction.emoji.name) && u.id === user.id;
+      };
+      awaitReactions(message, reply, filter, user, db, client, oldBet);
+      await applyButtons(reply, buttons);
 
       break;
 
@@ -496,6 +469,7 @@ async function blackjacko(message, command, argument, user, db, client) {
           blackjack.user_cards[i].suit;
       }
       msg += " [" + calcBJValue(blackjack.user_cards) + "]";
+
       if (
         calcBJValue(blackjack.dealer_cards) > 21 ||
         calcBJValue(blackjack.dealer_cards) < calcBJValue(blackjack.user_cards)
@@ -508,15 +482,8 @@ async function blackjacko(message, command, argument, user, db, client) {
           { $inc: { gold: blackjack.bet * 2, blackjack_wins: 1 } }
         );
         blackjack.active = 0;
-        const reply = await message.reply(
-          await blackjackEmbed(blackjack, msg, user, client)
-        );
-        const buttons = ['⤵️', '🔁', '⤴️'];
-        await applyButtons(reply, buttons);
-        const filter = (reaction, u) => {
-          return buttons.includes(reaction.emoji.name) && u.id === user.id;
-        };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
+        buttons = ['⤵️', '🔁', '⤴️'];
       } else if (
         calcBJValue(blackjack.dealer_cards) == calcBJValue(blackjack.user_cards)
       ) {
@@ -528,29 +495,16 @@ async function blackjacko(message, command, argument, user, db, client) {
           { $inc: { gold: blackjack.bet, blackjack_ties: 1 } }
         );
         blackjack.active = 0;
-        const reply = await message.reply(
-          await blackjackEmbed(blackjack, msg, user, client)
-        );
-        const buttons = ['⤵️', '🔁', '⤴️'];
-        await applyButtons(reply, buttons);
-        const filter = (reaction, u) => {
-          return buttons.includes(reaction.emoji.name) && u.id === user.id;
-        };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
+        buttons = ['⤵️', '🔁', '⤴️'];
       } else {
-        msg =
-          "\n\nYou lost, better luck next time. To play again use !bet <amount>";
+        msg = "\n\nYou lost, better luck next time. To play again use !bet <amount>";
         blackjack.active = 0;
-        const reply = await message.reply(
-          await blackjackEmbed(blackjack, msg, user, client)
-        );
-        const buttons = ['⤵️', '🔁', '⤴️'];
-        await applyButtons(reply, buttons);
-        const filter = (reaction, u) => {
-          return buttons.includes(reaction.emoji.name) && u.id === user.id;
-        };
-        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+        reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
+        buttons = ['⤵️', '🔁', '⤴️'];
       }
+
+      oldBet = blackjack.bet;
 
       blackjack.user_cards.length = 0;
       blackjack.dealer_cards.length = 0;
@@ -561,6 +515,12 @@ async function blackjacko(message, command, argument, user, db, client) {
         { $set: blackjack },
         { upsert: true }
       );
+
+      filter = (reaction, u) => {
+        return buttons.includes(reaction.emoji.name) && u.id === user.id;
+      };
+      awaitReactions(message, reply, filter, user, db, client, oldBet);
+      await applyButtons(reply, buttons);
 
       break;
   }
