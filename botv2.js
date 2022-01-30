@@ -8,6 +8,7 @@ const PREFIX = "!";
 const {heb, rheb} = require("./modules/commands/hotEyeBleach");
 const fun = require("./modules/commands/fun");
 const coinflip = require("./modules/commands/coinflip");
+const music = require("./modules/commands/music/music");
 const blackjack = require("./modules/commands/blackjack");
 const hangMan = require("./modules/commands/hangman/hangman");
 const eyeBleach = require("./modules/commands/eyeBleach");
@@ -89,6 +90,16 @@ client.on("messageCreate", async message => {
             break;
         case "hangman":
             message.reply(await hangMan.newGame());
+            break;
+        case "play":
+        case "skip":
+        case "stop":
+        case "queue":
+        case "pause":
+        case "resume":
+        case "nowplaying":
+        case "top":
+            await music(message, command, arguments, user, db, client);
             break;
         case "backup":
             await backup(db);
