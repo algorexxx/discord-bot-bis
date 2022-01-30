@@ -1,12 +1,12 @@
-async function eyeBleach(message, args, user, db, req, fs, client) {
+async function eyeBleach(message, command, argument, user, db, client) {
   const coinflipData = db.get("coinflips");
   const userData = db.get("users");
 
   let coinflips = await coinflipData.find({});
 
-  switch (args[0].toLowerCase()) {
+  switch (command.toLowerCase()) {
     case "coinflip":
-      if (!args[1]) {
+      if (!argument) {
         msg = "To start a coinflip write !coinflip <ammount of gold to bet>\n";
         msg += "To join an existing coinflip enter !join <coinflip number>\n";
         msg +=
@@ -22,40 +22,40 @@ async function eyeBleach(message, args, user, db, req, fs, client) {
             coinflips[i].ammount +
             " gold.\n";
         }
-        message.channel.send(msg);
-      } else if (parseInt(args[1]) > user.gold) {
-        message.channel.send(
+        message.reply(msg);
+      } else if (parseInt(argument) > user.gold) {
+        message.reply(
           "You cannot afford this. Please bet between 0 and " + user.gold
         );
-      } else if (!(parseInt(args[1]) > 0)) {
-        message.channel.send("Invalid bet ammount.");
+      } else if (!(parseInt(argument) > 0)) {
+        message.reply("Invalid bet ammount.");
       } else {
         await coinflipData.insert({
           user: message.author.id,
-          ammount: parseInt(args[1]),
+          ammount: parseInt(argument),
         });
         await userData.update(
           { id: user.id },
-          { $inc: { gold: -parseInt(args[1]) } },
+          { $inc: { gold: -parseInt(argument) } },
           { upsert: true }
         );
-        message.channel.send(
+        message.reply(
           message.author.username +
             "'s coinflip of " +
-            parseInt(args[1]) +
+            parseInt(argument) +
             " gold has been added."
         );
       }
       break;
     case "join":
-      coinflip_id = parseInt(args[1]);
+      coinflip_id = parseInt(argument);
       coinflip_index = coinflip_id - 1;
       if (!coinflip_id || coinflip_id < 1 || coinflip_id > coinflips.length) {
-        message.channel.send("Invalid coinflip number");
+        message.reply("Invalid coinflip number");
       } else if (coinflips[coinflip_index].ammount > user.gold) {
-        message.channel.send("You can't afford to join this coinflip.");
+        message.reply("You can't afford to join this coinflip.");
       } else if (coinflips[coinflip_index].user == user.id) {
-        message.channel.send(
+        message.reply(
           "You can't join your own coinflip. Use !cancel to get your gold returned."
         );
       } else {
@@ -73,7 +73,7 @@ async function eyeBleach(message, args, user, db, req, fs, client) {
           loser_id = coinflips[coinflip_index].user;
           winner_id = user.id;
         } else {
-          message.channel.send(
+          message.reply(
             "Something went wrong with coinflip, notify admin that the winning number was not between 0 and 1."
           );
         }
@@ -93,7 +93,7 @@ async function eyeBleach(message, args, user, db, req, fs, client) {
           { upsert: true }
         );
 
-        message.channel.send(
+        message.reply(
           (await client.users.fetch(winner_id)).username +
             " just won " +
             coinflips[coinflip_index].ammount +
@@ -108,32 +108,32 @@ async function eyeBleach(message, args, user, db, req, fs, client) {
 
     case "cancel":
       if (
-        !args[1] ||
-        parseInt(args[1]) < 1 ||
-        parseInt(args[1]) > coinflips.length
+        !argument ||
+        parseInt(argument) < 1 ||
+        parseInt(argument) > coinflips.length
       ) {
-        message.channel.send("Invalid coinflip number to cancel.");
-      } else if (coinflips[args[1] - 1].user != user.id) {
-        message.channel.send("You cannot cancel someone elses coinflip.");
+        message.reply("Invalid coinflip number to cancel.");
+      } else if (coinflips[argument - 1].user != user.id) {
+        message.reply("You cannot cancel someone elses coinflip.");
       } else {
         await userData.update(
           { id: user.id },
           {
             $inc: {
-              gold: coinflips[args[1] - 1].ammount,
+              gold: coinflips[argument - 1].ammount,
             },
           },
           { upsert: true }
         );
-        message.channel.send(
+        message.reply(
           "Coinflip " +
-            args[1] +
+            argument +
             " has been canceled and " +
-            coinflips[args[1] - 1].ammount +
+            coinflips[argument - 1].ammount +
             " gold has been returned."
         );
         await coinflipData.remove({
-          _id: coinflips[args[1] - 1]._id,
+          _id: coinflips[argument - 1]._id,
         });
       }
       break;

@@ -1,7 +1,10 @@
-var download = function (uri, filename, callback, req, fs) {
+const req = require("request");
+var fs = require("fs");
+
+var download = function (uri, filename, callback) {
   req.head(uri, function (err, res, body) {
     if (!res) {
-      callback("error");
+      callback("error: ", err + body);
       return;
     } else if (!res.headers["content-type"].match(/(image\/|video\/mp4)/)) {
       callback("No image");
