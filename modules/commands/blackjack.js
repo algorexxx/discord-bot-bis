@@ -17,8 +17,9 @@ const card_value_strings = [
   ":regional_indicator_a:",
 ];
 
-async function blackjack(message, command, argument, user, db, client) {
+async function blackjacko(message, command, argument, user, db, client) {
   let blackjack;
+  console.log(command + " " + argument)
   const blackjackData = db.get("blackjacks");
   const userData = db.get("users");
   switch (command.toLowerCase()) {
@@ -39,13 +40,13 @@ async function blackjack(message, command, argument, user, db, client) {
 
       if (!bj) {
         message.reply(
-          "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <ammount>"
+          "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <amount>"
         );
         return;
       }
       if (bj.bet == 0) {
         message.reply(
-          "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <ammount>"
+          "Welcome to the blackjack table.\n\nTo start playing, place your bet with !bet <amount>"
         );
         return;
       } else {
@@ -89,7 +90,7 @@ async function blackjack(message, command, argument, user, db, client) {
       }
 
       if (!parseInt(argument) || parseInt(argument) < 1) {
-        message.reply("Invalid bet ammount, please try again.");
+        message.reply("Invalid bet amount, please try again.");
         return;
       }
 
@@ -162,11 +163,17 @@ async function blackjack(message, command, argument, user, db, client) {
           );
           user.gold += Math.round(2.5 * blackjack.bet);
           msg =
-            "\n\nBlackjack! Congratulations!\n\nTo play again use !bet <ammount>";
+            "\n\nBlackjack! Congratulations!\n\nTo play again use !bet <amount>";
           blackjack.active = 0;
-          message.reply(
+          const reply = await message.reply(
             await blackjackEmbed(blackjack, msg, user, client)
           );
+          const buttons = ['⤵️', '🔁', '⤴️'];
+        await applyButtons(reply, buttons);
+        const filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
           blackjack.user_cards.length = 0;
           blackjack.dealer_cards.length = 0;
           blackjack.bet = 0;
@@ -176,14 +183,26 @@ async function blackjack(message, command, argument, user, db, client) {
           calcBJValue(blackjack.user_cards) < 12
         ) {
           msg = "\n\nDo you want to !hit, !stand or !double?";
-          message.reply(
+          const reply = await message.reply(
             await blackjackEmbed(blackjack, msg, user, client)
           );
+          const buttons = ['📥', '🛑', '🇩'];
+          await applyButtons(reply, buttons);
+          const filter = (reaction, u) => {
+            return buttons.includes(reaction.emoji.name) && u.id === user.id;
+          };
+          awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
         } else {
           msg = "\n\nDo you want to !hit or !stand?";
-          message.reply(
+          const reply = await message.reply(
             await blackjackEmbed(blackjack, msg, user, client)
           );
+          const buttons = ['📥', '🛑'];
+          await applyButtons(reply, buttons);
+          const filter = (reaction, u) => {
+            return buttons.includes(reaction.emoji.name) && u.id === user.id;
+          };
+          awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
         }
         await blackjackData.update(
           { owner: user.id },
@@ -242,17 +261,31 @@ async function blackjack(message, command, argument, user, db, client) {
       msg += " [" + calcBJValue(blackjack.user_cards) + "]";
       if (calcBJValue(blackjack.user_cards) < 22) {
         msg = "\n\nDo you want to !hit or !stand?";
-        message.reply(
+        const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
+
+        const buttons = ['📥', '🛑'];
+        await applyButtons(reply, buttons);
+        const filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       } else {
-        msg =
-          "\n\nBust! Better luck next time. To play again use !bet <ammount>";
+        msg = "\n\nBust! Better luck next time. To play again use !bet <amount>";
 
         blackjack.active = 0;
-        message.reply(
+        const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
+
+        const buttons = ['⤵️', '🔁', '⤴️'];
+        await applyButtons(reply, buttons);
+        const filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
+
         blackjack.user_cards.length = 0;
         blackjack.dealer_cards.length = 0;
         blackjack.bet = 0;
@@ -319,7 +352,7 @@ async function blackjack(message, command, argument, user, db, client) {
         calcBJValue(blackjack.dealer_cards) > 21 ||
         calcBJValue(blackjack.dealer_cards) < calcBJValue(blackjack.user_cards)
       ) {
-        msg = "\n\nYou won, congrats! To play again use !bet <ammount>";
+        msg = "\n\nYou won, congrats! To play again use !bet <amount>";
         user.gold += blackjack.bet * 2;
         await userData.update(
           { id: user.id },
@@ -327,13 +360,19 @@ async function blackjack(message, command, argument, user, db, client) {
         );
         user.blackjack_wins += 1;
         blackjack.active = 0;
-        message.reply(
+        const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
+        const buttons = ['⤵️', '🔁', '⤴️'];
+        await applyButtons(reply, buttons);
+        const filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       } else if (
         calcBJValue(blackjack.dealer_cards) == calcBJValue(blackjack.user_cards)
       ) {
-        msg = "\n\nTie! Better than nothing! To play again use !bet <ammount>";
+        msg = "\n\nTie! Better than nothing! To play again use !bet <amount>";
         await userData.update(
           { id: user.id },
           { $inc: { gold: blackjack.bet } }
@@ -341,16 +380,28 @@ async function blackjack(message, command, argument, user, db, client) {
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
         blackjack.active = 0;
-        message.reply(
+        const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
+        const buttons = ['⤵️', '🔁', '⤴️'];
+        await applyButtons(reply, buttons);
+        const filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       } else {
         msg =
-          "\n\nYou lost, better luck next time. To play again use !bet <ammount>";
+          "\n\nYou lost, better luck next time. To play again use !bet <amount>";
         blackjack.active = 0;
-        message.reply(
+        const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
+        const buttons = ['⤵️', '🔁', '⤴️'];
+        await applyButtons(reply, buttons);
+        const filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       }
 
       blackjack.user_cards.length = 0;
@@ -449,7 +500,7 @@ async function blackjack(message, command, argument, user, db, client) {
         calcBJValue(blackjack.dealer_cards) > 21 ||
         calcBJValue(blackjack.dealer_cards) < calcBJValue(blackjack.user_cards)
       ) {
-        msg = "\n\nYou won, congrats! To play again use !bet <ammount>";
+        msg = "\n\nYou won, congrats! To play again use !bet <amount>";
         user.gold += blackjack.bet * 2;
         user.blackjack_wins += 1;
         await userData.update(
@@ -457,13 +508,19 @@ async function blackjack(message, command, argument, user, db, client) {
           { $inc: { gold: blackjack.bet * 2, blackjack_wins: 1 } }
         );
         blackjack.active = 0;
-        message.reply(
+        const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
+        const buttons = ['⤵️', '🔁', '⤴️'];
+        await applyButtons(reply, buttons);
+        const filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       } else if (
         calcBJValue(blackjack.dealer_cards) == calcBJValue(blackjack.user_cards)
       ) {
-        msg = "\n\nTie! Better than nothing! To play again use !bet <ammount>";
+        msg = "\n\nTie! Better than nothing! To play again use !bet <amount>";
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
         await userData.update(
@@ -471,16 +528,28 @@ async function blackjack(message, command, argument, user, db, client) {
           { $inc: { gold: blackjack.bet, blackjack_ties: 1 } }
         );
         blackjack.active = 0;
-        message.reply(
+        const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
+        const buttons = ['⤵️', '🔁', '⤴️'];
+        await applyButtons(reply, buttons);
+        const filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       } else {
         msg =
-          "\n\nYou lost, better luck next time. To play again use !bet <ammount>";
+          "\n\nYou lost, better luck next time. To play again use !bet <amount>";
         blackjack.active = 0;
-        message.reply(
+        const reply = await message.reply(
           await blackjackEmbed(blackjack, msg, user, client)
         );
+        const buttons = ['⤵️', '🔁', '⤴️'];
+        await applyButtons(reply, buttons);
+        const filter = (reaction, u) => {
+          return buttons.includes(reaction.emoji.name) && u.id === user.id;
+        };
+        awaitReactions(message, reply, filter, user, db, client, blackjack.bet);
       }
 
       blackjack.user_cards.length = 0;
@@ -521,6 +590,42 @@ function calcBJValue(hand) {
   }
 
   return total;
+}
+
+async function awaitReactions(message, reply, filter, user, db, client, bet){
+  reply.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] })
+  .then(async collected => {
+    const reaction = collected.first();
+    switch (reaction.emoji.name){
+      case '📥':
+        await blackjacko(message, "hit", undefined, user, db, client);
+        break;
+      case '🛑':
+        await blackjacko(message, "stand", undefined, user, db, client);
+        break;
+      case '🔁':
+        await blackjacko(message, "bet", bet, user, db, client);
+        break;
+      case '🇩':
+        await blackjacko(message, "double", undefined, user, db, client);
+        break;
+      case '⤴️':
+        await blackjacko(message, "bet", bet*2, user, db, client);
+        break;
+      case '⤵️':
+        await blackjacko(message, "bet", bet/2, user, db, client);
+        break;
+    }
+  })
+  .catch(collected => {
+    reply.reactions.removeAll();
+  });
+}
+
+async function applyButtons(reply, buttons){
+  for (let i = 0; i<buttons.length; i++){
+    await reply.react(buttons[i]);
+  }
 }
 
 async function blackjackEmbed(game, description, user, client) {
@@ -570,4 +675,4 @@ async function blackjackEmbed(game, description, user, client) {
       .setFooter({ text: "Cards Remaining: " + game.deck.length + " | Gold: " + user.gold, iconURL: 'https://cdn4.iconfinder.com/data/icons/casino-general/512/Stack_of_Cards-512.png' })]};
 }
 
-module.exports = blackjack;
+module.exports = blackjacko;
