@@ -1,15 +1,22 @@
 const { songEmbed, topSongsEmbed } = require("./musicEmbeds");
-const fetchVideoInfo = require("youtube-info");
+const { 
+  joinVoiceChannel, 
+  getVoiceConnection, 
+  createAudioPlayer, 
+  createAudioResource, 
+  AudioPlayerStatus } = require('@discordjs/voice');
 const YTDL = require("ytdl-core");
 var queue = [];
 
-async function music(message, args, user, db, req, fs, client) {
+let player;
+
+async function music(message, command, args, user, db, client) {
   const userData = db.get("users");
   const songData = db.get("songs");
 
-  switch (args[0].toLowerCase()) {
+  switch (command.toLowerCase()) {
     case "play":
-      if (!args[1] && queue.length < 1) {
+      if (!args[0] && queue.length < 1) {
         message.channel.send("Please post a youtube video.");
         return;
       }
@@ -18,26 +25,23 @@ async function music(message, args, user, db, req, fs, client) {
         return;
       }
 
-      if (!args[1]) {
-        if (
-          !(message.guild.voiceStates.cache.get(client.user.id) || {}).channelID
-        ) {
-          let connection = await message.member.voice.channel.join();
-          play(connection, message);
+      if (!args[0]) {
+        if (!(message.guild.voiceStates.cache.get(client.user.id) || {}).channelID) {
+          play(message);
         }
         return;
       }
 
       var expression = /(top)\s*([0-9]*)/gi;
 
-      var match = expression.exec(args[1]);
+      var match = expression.exec(args[0]);
 
       if (match) {
         let all_music_ever_sorted = await songData.find(
           {},
           { sort: { times_requested: -1 } }
         );
-        arg_no = 2;
+        arg_no = 1;
         invalid_top_song = 0;
         songs_cost = 0;
         added_songs = 0;
@@ -53,8 +57,7 @@ async function music(message, args, user, db, req, fs, client) {
               !(message.guild.voiceStates.cache.get(client.user.id) || {})
                 .channelID
             ) {
-              let connection = await message.member.voice.channel.join();
-              play(connection, message);
+              play(message);
             }
 
             await songData.update(
@@ -106,14 +109,14 @@ async function music(message, args, user, db, req, fs, client) {
         return;
       }
 
-      arg_no = 1;
+      arg_no = 0;
       num_of_links = 0;
       added_songs = 0;
       while (args[arg_no]) {
         num_of_links += 1;
         arg_no += 1;
       }
-      arg_no = 1;
+      arg_no = 0;
 
       var expression = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/gi;
 
@@ -128,15 +131,13 @@ async function music(message, args, user, db, req, fs, client) {
       } else {
         let song = await songData.findOne({ id: song_id });
         if (!song) {
-          let videoInfo = await fetchVideoInfo(song_id);
-          let song_info = videoInfo;
+          let vinfo = await YTDL.getBasicInfo(args[arg_no]);
           song = {
             id: song_id,
-            title: song_info.title,
-            views: song_info.views,
-            thumbnail: song_info.thumbnailUrl,
-            duration: song_info.duration,
-            genre: song_info.genre,
+            title: vinfo.videoDetails.title,
+            views: vinfo.videoDetails.viewCount,
+            thumbnail: vinfo.videoDetails.thumbnails[0].url,
+            duration: vinfo.videoDetails.lengthSeconds,
             requester: message.author.id,
             times_requested: 1,
           };
@@ -164,15 +165,10 @@ async function music(message, args, user, db, req, fs, client) {
           { id: user.id },
           { $inc: { gold: -song_cost, music_reqs: 1 } }
         );
-        if (
-          !(message.guild.voiceStates.cache.get(client.user.id) || {}).channelID
-        ) {
-          let connection = await message.member.voice.channel.join();
-          play(connection, message);
+        if (!(message.guild.voiceStates.cache.get(client.user.id) || {}).channelID) {
+          play(message);
         }
-        message.channel.send(
-          "Music added to queue at a cost of " + song_cost + " gold!"
-        );
+        message.channel.send("Music added to queue at a cost of " + song_cost + " gold!");
       }
 
       break;
@@ -191,7 +187,7 @@ async function music(message, args, user, db, req, fs, client) {
           skip_cost = 0;
         }
 
-        if (dispatcher) {
+        if (player) {
           if (user.gold < skip_cost) {
             message.channel.send(
               "Err. You cant afford to skip song. (Need: " +
@@ -206,19 +202,20 @@ async function music(message, args, user, db, req, fs, client) {
               { $inc: { gold: -skip_cost, music_skips: 1 } }
             );
             message.channel.send("Song skipped for " + skip_cost + " gold.");
-            dispatcher.end();
+            queue.shift();
+            play(message, "skip");
           }
         }
       }
       break;
     case "pause":
       await userData.update({ id: user.id }, { $inc: { gold: -10 } });
-      dispatcher.pause();
+      player.pause();
       message.channel.send("Music paused for " + 10 + " gold.");
       break;
     case "resume":
       await userData.update({ id: user.id }, { $inc: { gold: -5 } });
-      dispatcher.resume();
+      player.unpause();
       message.channel.send("Music resumed for " + 5 + " gold.");
       break;
 
@@ -227,14 +224,11 @@ async function music(message, args, user, db, req, fs, client) {
         !(message.guild.voiceStates.cache.get(client.user.id) || {}).channelID
       ) {
         if (user.gold < -1000) {
-          message.channel.send(
-            "Err. You cant afford to stop & clear queue. (Need: 150 Have: " +
-              user.gold +
-              ")"
-          );
+          message.channel.send("Err. You cant afford to stop & clear queue. (Need: 150 Have: " + user.gold + ")");
         } else {
           queue = [];
-          message.guild.voiceConnection.disconnect();
+          let connection = getVoiceConnection(message.guild.id);
+          connection.disconnect();
           await userData.update(
             { id: user.id },
             { $inc: { gold: -100, music_stops: 1 } }
@@ -253,11 +247,11 @@ async function music(message, args, user, db, req, fs, client) {
       break;
 
     case "top":
-      if (!parseInt(args[2]) || parseInt(args[2]) < parseInt(args[1])) {
+      if (!parseInt(args[1]) || parseInt(args[1]) < parseInt(args[0])) {
         start_num = 0;
 
-        num = parseInt(args[1]);
-        if (!parseInt(args[1]) || parseInt(args[1]) < 1) {
+        num = parseInt(args[0]);
+        if (!parseInt(args[0]) || parseInt(args[0]) < 1) {
           num = 20;
         }
 
@@ -265,8 +259,8 @@ async function music(message, args, user, db, req, fs, client) {
           num = 200;
         }
       } else {
-        start_num = parseInt(args[1]) - 1;
-        num = parseInt(args[2]);
+        start_num = parseInt(args[0]) - 1;
+        num = parseInt(args[1]);
       }
 
       let all_music_ever_sorted = await songData.find(
@@ -295,17 +289,43 @@ async function music(message, args, user, db, req, fs, client) {
   }
 }
 
-function play(connection, message) {
-  dispatcher = connection.play(
-    YTDL("https://youtu.be/" + queue[0].id, { filter: "audioonly" }),
-    { volume: "0.2", passes: "2", bitrate: "96000" }
-  );
+function play(message, command) {
+  if(((player || {})._state || {}).status === 'playing' && command !== "skip"){
+    return;
+  }
 
-  dispatcher.on("finish", function () {
-    queue.shift();
-    if (queue[0]) play(connection, message);
-    else connection.disconnect();
-  });
+  let connection = getVoiceConnection(message.guild.id);
+
+  if (((connection || {})._state || {}).status !== 'connected'){
+    joinVoiceChannel({
+      channelId: message.member.voice.channel.id,
+      guildId: message.guild.id,
+      adapterCreator: message.guild.voiceAdapterCreator
+    });
+    connection = getVoiceConnection(message.guild.id);
+  }
+
+  if (!player){
+    player = createAudioPlayer();
+
+    player.on(AudioPlayerStatus.Idle, () => {
+      queue.shift();
+      if (queue[0]) play(message);
+      else connection.disconnect();
+    });
+  }
+
+  if(queue.length <= 0){
+    player.stop();
+    return;
+  }
+
+  connection.subscribe(player);
+
+  const resource = createAudioResource(YTDL("https://youtu.be/" + queue[0].id, { filter: "audioonly", highWaterMark: 1<<25 }),{ inlineVolume: true, highWaterMark: 1<<25 });
+  resource.volume.setVolume(0.2)
+
+  player.play(resource);
 }
 
 module.exports = music;

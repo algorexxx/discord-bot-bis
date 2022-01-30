@@ -1,3 +1,5 @@
+const { MessageEmbed } = require('discord.js');
+
 function songEmbed(songs, fun_title) {
   var song_embed = {
     embed: {
@@ -42,7 +44,6 @@ function songEmbed(songs, fun_title) {
     if (j != 0) song_embed.embed.fields[j] = { name: "-", value: "" };
 
     for (i = 1; i < idx; i++) {
-      console.log(i + j * 10);
       if (i + j * 10 < 10) num_str = " " + (i + j * 10);
       else num_str = i + j * 10;
       song_disp = songs[i + j * 10].title
@@ -60,22 +61,33 @@ function songEmbed(songs, fun_title) {
         ") (" +
         secondsToTime(songs[i + j * 10].duration) +
         ")\n";
-      console.log(songs[i + j * 10].id);
-      /*console.log(
-        "``*" +
-          num_str +
-          ":`` [" +
-          song_disp +
-          "](https://youtu.be/" +
-          songs[i + j * 10].id +
-          ") (" +
-          secondsToTime(songs[i + j * 10].duration) +
-          ")\n"
-      );*/
     }
   }
 
-  return song_embed;
+  const songEmbed = new MessageEmbed()
+    .setColor('#BEFC65')
+    .setTitle(songs[0].title)
+    .setURL('https://discord.js.org/')
+    .setAuthor({ name: "Music Lovers: " + fun_title[0], iconURL: "https://cdn1.iconfinder.com/data/icons/google_jfk_icons_by_carlosjj/512/music.png"})
+    .setDescription("Duration: " +
+    secondsToTime(songs[0].duration) +
+    " | Requested: " +
+    songs[0].times_requested +
+    " times\n[[Youtube]](https://youtu.be/" +
+    songs[0].id +
+    ") | [[Discogs]](https://www.discogs.com/search/?q=" +
+    songs[0].title.replace(/ /g, "+").replace(/[\(\)]/g, "") +
+    "&type=all)")
+    .setThumbnail(songs[0].thumbnail);
+
+    if (song_embed.embed.fields){
+      song_embed.embed.fields.forEach(field => {
+        songEmbed.addFields({ name: field.name, value: field.value});
+      });
+    }
+    
+
+    return { embeds: [songEmbed]};
 }
 
 function topSongsEmbed(start_number, end_number, all_music_ever_sorted) {
@@ -113,7 +125,7 @@ function topSongsEmbed(start_number, end_number, all_music_ever_sorted) {
   for (i = 0; i < Math.ceil(end_number / 10 - start_number / 10); i++) {
     top_songs_embed.embed.fields[i] = {
       name:
-        "..................................................................................................................................................." +
+        ".................................................................................................................................." +
         ((i + 1) * 10 - 9 + start_number) +
         "-" +
         ((i + 1) * 10 + start_number),
@@ -145,8 +157,24 @@ function topSongsEmbed(start_number, end_number, all_music_ever_sorted) {
         " reqs\n";
     }
   }
-  return top_songs_embed;
-}
+
+    const topSongsEmbed = new MessageEmbed()
+      .setColor('#810597')
+      .setAuthor({ name: "Music Lovers: Top " +
+      (start_number + 1) +
+      "-" +
+      end_number +
+      " Songs", iconURL: 'https://cdn1.iconfinder.com/data/icons/google_jfk_icons_by_carlosjj/512/music.png' })
+      .setFooter({ text: "Total number of songs: " + all_music_ever_sorted.length, iconURL: 'http://i.imgur.com/dWBfiT6.png' });
+
+      if (top_songs_embed.embed.fields){
+        top_songs_embed.embed.fields.forEach(field => {
+          topSongsEmbed.addFields({ name: field.name, value: field.value});
+        });
+      }
+
+      return { embeds: [topSongsEmbed]};
+    }
 
 function secondsToTime(secs) {
   var hours = Math.floor(secs / (60 * 60));
@@ -158,11 +186,13 @@ function secondsToTime(secs) {
   var seconds = Math.ceil(divisor_for_seconds);
 
   string = "";
+  let hours_string;
   if (hours > 0) {
     hours_string = hours + ":";
   } else {
     hours_string = "";
   }
+  let minutes_string;
   if (minutes > 0 && minutes < 10 && hours > 0) {
     minutes_string = "0" + minutes + ":";
   } else if (minutes > 0) {
@@ -172,6 +202,7 @@ function secondsToTime(secs) {
   } else {
     minutes_string = "";
   }
+  let seconds_string;
   if (seconds > 0 && seconds < 10 && (minutes > 0 || hours > 0)) {
     seconds_string = "0" + seconds + "";
   } else if (seconds > 0 && (minutes > 0 || hours > 0)) {
@@ -179,7 +210,7 @@ function secondsToTime(secs) {
   } else if (seconds > 0) {
     seconds_string = seconds + "s";
   } else if (hours > 0 || minutes > 0) {
-    second_string = "00";
+    seconds_string = "00";
   } else {
     seconds_string = "0s";
   }
