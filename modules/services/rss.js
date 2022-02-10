@@ -1,8 +1,18 @@
 const Parser = require("rss-parser");
 const { MessageEmbed } = require('discord.js');
 
-async function rss(db, client) {
-  const rssData = db.get("csgoreddit");
+async function rss(db, client){
+  const feedData = db.get("rssfeeds");
+  let configs = await feedData.find();
+
+  for (let i = 0; i<configs.length; i++){
+    const config = configs[i];
+    setTimeout(() => {  getFeed(config, db, client); }, i*20000);
+  }
+}
+
+async function getFeed(config, db, client) {
+  const rssData = db.get(config.database);
 
   let parser = new Parser({
     customFields: {
@@ -13,9 +23,7 @@ async function rss(db, client) {
   });
 
   (async () => {
-    let feed = await parser.parseURL(
-      "https://www.reddit.com/r/GlobalOffensive/.rss"
-    );
+    let feed = await parser.parseURL(config.feed);
 
     for (i = 0; i < 10; i++) {
       let found = await rssData.findOne({ url: feed.items[i].link });
@@ -26,14 +34,14 @@ async function rss(db, client) {
           { $set: { url: feed.items[i].link } },
           { upsert: true }
         );
-        let channel = await client.channels.fetch("434294330971389952");
-        channel.send({embeds: [redditEmbed(feed.items[i])]});
+        let channel = await client.channels.fetch(config.channelId);
+        channel.send({embeds: [redditEmbed(config, feed.items[i])]});
       }
     }
   })();
 }
 
-function redditEmbed(item) {
+function redditEmbed(config, item) {
   var expression = /(.*)(submitted by.*\])/gi;
   var match = expression.exec(item.contentSnippet);
   if (match) {
@@ -43,22 +51,22 @@ function redditEmbed(item) {
       var content = match[1];
     }
   }
-  
+
   let thumbnailUrl = ((item.thumbnail || {})['$'] || {}).url || "";
   if (thumbnailUrl.length > 0){
     thumb_url = thumbnailUrl;
   } else {
-    thumb_url = "https://seeklogo.com/images/C/Counter-Strike-logo-EAC70C9C3A-seeklogo.com.png";
+    thumb_url = config.thumbnail;
   }
   
   const embed = new MessageEmbed()
     .setColor('#03D3D4')
     .setTitle(item.title.length > 255 ? item.title.substring(0,250) + "..." : item.title)
     .setURL(item.link)
-    .setAuthor({ name: 'CS:GO Reddit: New & Hot', iconURL: 'https://b.thumbs.redditmedia.com/g5eFUVT_1xS2OUI_uYxOGlZAsYHkLrq2Hhsz8Fnloes.png', url: 'https://www.reddit.com/r/GlobalOffensive/' })
+    .setAuthor({ name: config.title, iconURL: config.iconUrl, url: config.url })
     .setThumbnail(thumb_url)
     .setTimestamp(item.isoDate)
-    .setFooter({ text: "Added by " + item.author, iconURL: 'https://b.thumbs.redditmedia.com/g5eFUVT_1xS2OUI_uYxOGlZAsYHkLrq2Hhsz8Fnloes.png' });
+    .setFooter({ text: "Added by " + item.author, iconURL: config.iconUrl });
 
   if (content) embed.setDescription(content);
     return embed;
