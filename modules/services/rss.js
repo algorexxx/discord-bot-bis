@@ -4,7 +4,14 @@ const { MessageEmbed } = require('discord.js');
 async function rss(db, client) {
   const rssData = db.get("csgoreddit");
 
-  let parser = new Parser();
+  let parser = new Parser({
+    customFields: {
+      item: [
+        ['media:thumbnail', 'thumbnail'],
+      ]
+    }
+  });
+
   (async () => {
     let feed = await parser.parseURL(
       "https://www.reddit.com/r/GlobalOffensive/.rss"
@@ -36,20 +43,17 @@ function redditEmbed(item) {
       var content = match[1];
     }
   }
-
-  var expression = /(<img src=\\?")(https?:\/\/.*\.thumbs.*?\.(jpg|gif|jpeg))/gi;
-  var match = expression.exec(item.content);
-
-  if (match) {
-    thumb_url = match[2];
+  
+  let thumbnailUrl = ((item.thumbnail || {})['$'] || {}).url || "";
+  if (thumbnailUrl.length > 0){
+    thumb_url = thumbnailUrl;
   } else {
-    thumb_url =
-      "https://seeklogo.com/images/C/Counter-Strike-logo-EAC70C9C3A-seeklogo.com.png";
+    thumb_url = "https://seeklogo.com/images/C/Counter-Strike-logo-EAC70C9C3A-seeklogo.com.png";
   }
   
   const embed = new MessageEmbed()
     .setColor('#03D3D4')
-    .setTitle(item.title.substring(0,250) + "...")
+    .setTitle(item.title.length > 255 ? item.title.substring(0,250) + "..." : item.title)
     .setURL(item.link)
     .setAuthor({ name: 'CS:GO Reddit: New & Hot', iconURL: 'https://b.thumbs.redditmedia.com/g5eFUVT_1xS2OUI_uYxOGlZAsYHkLrq2Hhsz8Fnloes.png', url: 'https://www.reddit.com/r/GlobalOffensive/' })
     .setThumbnail(thumb_url)
