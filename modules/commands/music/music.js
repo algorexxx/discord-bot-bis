@@ -131,7 +131,14 @@ async function music(message, command, args, user, db, client) {
       } else {
         let song = await songData.findOne({ id: song_id });
         if (!song) {
-          let vinfo = await YTDL.getBasicInfo(args[arg_no]);
+          let vinfo;
+          try {
+            vinfo = await YTDL.getBasicInfo(args[arg_no]);
+          } catch (e){
+            message.channel.send("Couldnt get: " + song_id + " - Possibly restricted?");
+            return;
+          }
+
           song = {
             id: song_id,
             title: vinfo.videoDetails.title,
@@ -322,10 +329,19 @@ function play(message, command) {
 
   connection.subscribe(player);
 
-  const resource = createAudioResource(YTDL("https://youtu.be/" + queue[0].id, { filter: "audioonly", highWaterMark: 1<<25 }),{ inlineVolume: true, highWaterMark: 1<<25 });
-  resource.volume.setVolume(0.2)
-
-  player.play(resource);
+  try {
+    let youtubeVideo = YTDL("https://youtu.be/" + queue[0].id, { filter: "audioonly", highWaterMark: 1<<25 });
+    const resource = createAudioResource(youtubeVideo,{ inlineVolume: true, highWaterMark: 1<<25 });
+    resource.volume.setVolume(0.2)
+  
+    player.play(resource);
+  } catch (e) {
+    queue.shift();
+    if (queue[0]) play(message);
+    else connection.disconnect();
+    message.channel.send("Couldnt play: " + song_id + " - Possibly restricted?");
+  }
+  
 }
 
 module.exports = music;
