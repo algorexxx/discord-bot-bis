@@ -3,6 +3,8 @@ const { MessageEmbed } = require('discord.js');
 async function statsEmbed(statsUserName, statsUserAvatarUrl, user, channels) {
 
   const favouriteVoiceChannels = await getFavouriteVoiceChannels(user, channels);
+  const favouriteTextChannels = await getFavouriteTextChannels(user, channels);
+
     return new MessageEmbed()
       .setColor('#57A500')
       .setTitle(statsUserName + "'s stats")
@@ -10,7 +12,8 @@ async function statsEmbed(statsUserName, statsUserAvatarUrl, user, channels) {
       .setDescription("Gold: " + user.gold + "\nHours in voicechat: " + Math.round((user.online_mins / 60 + 0.00001) * 100) / 100)
       .setThumbnail(statsUserAvatarUrl)
       .addFields(
-        { name: "Favourite Voice Channels", value: favouriteVoiceChannels, inline: false },
+        { name: "Favourite Voice Channels", value: favouriteVoiceChannels, inline: true },
+        { name: "Favourite Text Channels", value: favouriteTextChannels, inline: true },
         { name: "Eyebleach", value: "Eyebleach added: " + user.eb_added + "\nEyebleach watched: " + user.eb_watched + "\nHot eyebleach added: " + user.heb_added + "\nHot eyebleach watched: " + user.heb_watched, inline: false },
         { name: 'Music', value: "Music requests: " + user.music_reqs + "\nMusic skips: " + user.music_skips + "\nMusic stops: " + user.music_stops, inline: false },
         { name: 'Gambling', value: "Coinflip wins: " + user.coinflips_won + " of " + Math.round(user.coinflips_won + user.coinflips_lost) + " (" + Math.round((user.coinflips_won * 100)/(user.coinflips_won + user.coinflips_lost)) + "%)\nBlackjack wins: " + user.blackjack_wins + " of " + user.blackjack_hands + " (" + Math.round((user.blackjack_wins * 100) / user.blackjack_hands) + "%)\nBlackjacks: " + user.blackjack_bjs, inline: false },
@@ -18,8 +21,7 @@ async function statsEmbed(statsUserName, statsUserAvatarUrl, user, channels) {
     );
 }
 
-async function getFavouriteVoiceChannels(user, channels)
-{
+async function getFavouriteVoiceChannels(user, channels){
   if (!user.voiceChannels){
     return "No channels?"
   }
@@ -36,6 +38,26 @@ async function getFavouriteVoiceChannels(user, channels)
     const hours = Math.floor(user.voiceChannels[sorted[i]] / 60);
     const minutes = user.voiceChannels[sorted[i]] - (hours*60);
     channelString += (i+1) + ": " + channel.name + " (" + hours + "h " + minutes + "m)\n"
+  }
+
+  return channelString;
+}
+
+async function getFavouriteTextChannels(user, channels){
+  if (!user.textChannels){
+    return "No channels?"
+  }
+
+  let sorted = Object.keys(user.textChannels).sort((a, b) => user.textChannels[b] - user.textChannels[a]);
+  let channelString = "";
+  for (let i = 0; i<sorted.length; i++){
+    let channel; 
+    try {
+      channel = await channels.fetch(sorted[i]);
+    } catch (e){
+      channel = {name: "unknown"};
+    }
+    channelString += (i+1) + ": " + channel.name + " (" + user.textChannels[sorted[i]] + " posts)\n"
   }
 
   return channelString;
