@@ -1,4 +1,5 @@
 const {getUser} = require("../services/userService");
+const inactivityVoiceChannelId = "436459953570578432";
 
 async function statsUpdate(db, client) {
   const userData = db.get("users");
@@ -11,6 +12,7 @@ async function statsUpdate(db, client) {
   for (let i = 0; i<memberIds.length; i++){
     const member = members.get(memberIds[i]);
     const user = await getUser(member.user.id, userData);
+    const currentVoiceChannelId = member.voice.channelId;
 
     if (user.active) {
       user.gold += 10;
@@ -18,13 +20,17 @@ async function statsUpdate(db, client) {
     }
 
     if (member.voice.channel) {
-      if (member.voice.channelID != "436459953570578432") {
-        console.log(user.id + " -  was given 20 for being in voice chat.");
+      if (currentVoiceChannelId != inactivityVoiceChannelId) {
+        console.log(user.id + " -  was given 20 gold for being in voice chat.");
         user.gold += 20;
         user.online_mins += 3;
+        if (!user.voiceChannels){
+          user.voiceChannels = {};
+        }
+        user.voiceChannels[currentVoiceChannelId] = (user.voiceChannels[currentVoiceChannelId] || 0) + 3;
       }
     }
-
+    
     await userData.update(
       { id: member.user.id },
       { $set: user },

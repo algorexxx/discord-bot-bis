@@ -25,7 +25,7 @@ async function stats(userName, user, db, client) {
     }
   }
 
-  return {embeds: [statsEmbed(dUser.displayName, dUser.displayAvatarURL(), stats_user)]};
+  return {embeds: [await statsEmbed(dUser.displayName, dUser.displayAvatarURL(), stats_user, guild.channels)]};
 }
 
 module.exports = stats;
