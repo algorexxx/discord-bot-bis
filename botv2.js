@@ -17,20 +17,23 @@ const backup = require("./modules/services/backup");
 const stats = require('./modules/commands/stats');
 const statsUpdate = require("./modules/utilities/statsUpdate");
 const helpEmbed = require("./modules/utilities/helpEmbed");
+const incrementMessageCount = require("./modules/utilities/incrementMessageCount");
 const rss = require('./modules/services/rss');
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.on("messageCreate", async message => { 
+client.on("messageCreate", async message => {
+    await incrementMessageCount(message, db);
+
     if (message.content.toLowerCase().includes("bitco")) {
         message.reply("https://www.youtube.com/watch?v=e5nyQmaq4k4");
     }
 
     if (!message.content.startsWith(PREFIX)) return;
-    const user = await getUser(message.author.id, userData);
 
+    const user = await getUser(message.author.id, userData);
     const command = message.content.substring(PREFIX.length).split(" ")[0];
     const arguments = message.content.substring(PREFIX.length).split(" ").slice(1);
 
