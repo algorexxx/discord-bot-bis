@@ -29,6 +29,6 @@
     "opusscript": "0.0.8",
     "request": "^2.88.2",
     "rss-parser": "^3.8.0",
-    "ytdl-core": "^4.10.1"
+    "ytdl-core": "^4.11.2"
   }
 }
