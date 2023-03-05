@@ -313,7 +313,11 @@ function play(message, command) {
   }
 
   if (!player){
-    player = createAudioPlayer();
+    player = createAudioPlayer({
+      behaviors: {
+        noSubscriber: NoSubscriberBehavior.Play,
+      },
+    });
 
     player.on(AudioPlayerStatus.Idle, () => {
       queue.shift();
