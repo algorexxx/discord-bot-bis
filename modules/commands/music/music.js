@@ -4,7 +4,8 @@ const {
   getVoiceConnection, 
   createAudioPlayer, 
   createAudioResource, 
-  AudioPlayerStatus } = require('@discordjs/voice');
+  AudioPlayerStatus,
+  NoSubscriberBehavior } = require('@discordjs/voice');
 const YTDL = require("ytdl-core");
 var queue = [];
 
