@@ -1,6 +1,6 @@
 {
   "name": "discord-bot-bis",
-  "version": "2.1.2",
+  "version": "3.0.0",
   "description": "",
   "main": "botv2.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "homepage": "https://github.com/ernyx/discord-bot-bis#readme",
   "dependencies": {
     "@discordjs/rest": "^0.3.0",
-    "@discordjs/voice": "^0.16.1",
+    "@discordjs/voice": "^0.18.0",
     "@distube/ytdl-core": "^4.15.1",
     "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
@@ -29,6 +29,6 @@
     "nodemon": "^2.0.4",
     "opusscript": "0.0.8",
     "request": "^2.88.2",
-    "rss-parser": "^3.8.0"
+    "rss-parser": "^3.13.0"
   }
 }

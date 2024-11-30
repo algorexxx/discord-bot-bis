@@ -1,4 +1,5 @@
 const { viewImage, addImage, removeImage } = require("./imageBaseCommand");
+const { getUser } = require("../services/userService");
 const settings = require('../../botSettings');
 
 const PARAMETERS = {
@@ -10,7 +11,8 @@ const PARAMETERS = {
   removeCommand: "rfun"
 }
 
-async function fun(message, command, args, user, client) {
+async function fun(message, command, args, client) {
+  const user = await getUser(message.author.id);
   if (command === PARAMETERS.command) {
     if (!args) {
       await viewImage(message, client, user, PARAMETERS);

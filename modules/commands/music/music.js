@@ -9,14 +9,14 @@ const {
 const YTDL = require("@distube/ytdl-core");
 var queue = [];
 const { findOne, insert, findAllSorted, incrementOne } = require("../../services/mongodbService");
-const { incrementUser } = require("../../services/userService");
+const { incrementUser, getUser } = require("../../services/userService");
 
 const COLLECTION_NAME = "songs";
 
-
 let player;
 
-async function music(message, command, args, user, client) {
+async function music(message, command, args, client) {
+  const user = await getUser(message.author.id);
   switch (command.toLowerCase()) {
     case "play":
       if (!args[0] && queue.length < 1) {

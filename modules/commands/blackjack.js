@@ -1,5 +1,5 @@
 const { findOne, updateOne } = require("../services/mongodbService");
-const { incrementUser } = require("../services/userService");
+const { incrementUser, getUser } = require("../services/userService");
 
 const COLLECTION_NAME = "blackjacks";
 
@@ -22,7 +22,8 @@ const card_value_strings = [
   ":regional_indicator_a:",
 ];
 
-async function blackjacko(message, command, argument, user, client) {
+async function blackjacko(message, command, argument, client) {
+  const user = await getUser(message.author.id);
   let blackjack;
 
   let buttons;

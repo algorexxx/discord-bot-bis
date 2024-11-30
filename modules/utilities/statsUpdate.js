@@ -1,8 +1,8 @@
 const { getUser, updateUser } = require("../services/userService");
-const inactivityVoiceChannelId = "436459953570578432";
+const settings = require("../../botSettings");
 
 async function statsUpdate(client) {
-  const guild = await client.guilds.fetch("426479768947654659");
+  const guild = await client.guilds.fetch(settings.GUILD_ID);
   const members = await guild.members.fetch();
 
   const memberIds = Array.from(members.keys());
@@ -18,8 +18,7 @@ async function statsUpdate(client) {
     }
 
     if (member.voice.channel) {
-      if (currentVoiceChannelId != inactivityVoiceChannelId) {
-        console.log(user.id + " -  was given 20 gold for being in voice chat.");
+      if (currentVoiceChannelId != settings.INACTIVITY_VOICE_CHANNEL_ID) {
         user.gold += 20;
         user.online_mins += 3;
         if (!user.voiceChannels) {

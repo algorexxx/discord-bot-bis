@@ -1,9 +1,10 @@
 const { findAll, remove, insert } = require("../services/mongodbService");
-const { incrementUser } = require("../services/userService");
+const { incrementUser, getUser } = require("../services/userService");
 
 const COLLECTION_NAME = "coinflips";
 
-async function eyeBleach(message, command, argument, user, client) {
+async function eyeBleach(message, command, argument, client) {
+  const user = await getUser(message.author.id);
   let coinflips = await findAll(COLLECTION_NAME);
 
   switch (command.toLowerCase()) {

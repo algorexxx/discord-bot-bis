@@ -59,4 +59,23 @@ async function updateOneUser(id, set) {
   return updateOne({ id: id }, set, COLLECTION_NAME);
 }
 
-module.exports = { defaultUser: defaultUser, createNewUser: createNewUser, getUser: getUser, updateUser: updateUser, incrementUser: incrementUser };
+async function incrementMessageCount(userId, channelId) {
+  const user = await getUser(userId);
+
+  if (!user.textChannels) {
+    user.textChannels = {};
+  }
+
+  user.textChannels[channelId] = (user.textChannels[channelId] || 0) + 1;
+
+  await updateUser(user.id, user);
+}
+
+module.exports = {
+  defaultUser: defaultUser,
+  createNewUser: createNewUser,
+  getUser: getUser,
+  updateUser: updateUser,
+  incrementUser: incrementUser,
+  incrementMessageCount: incrementMessageCount
+};
