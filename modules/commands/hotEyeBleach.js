@@ -2,13 +2,14 @@ const imageEmbed = require("../utilities/image");
 const download = require("../utilities/download");
 const getRandomInt = require("../utilities/getRandomInt");
 var fs = require("fs");
+const { findOne, updateOne, findAll, getNextId, remove } = require("../services/mongodbService");
+const { incrementUser } = require("../services/userService");
 
-async function heb(imageUrl, user, db, client) {
-  const eyeBleachData = db.get("hoteyebleach");
-  const userData = db.get("users");
+const COLLECTION_NAME = "hoteyebleach";
 
+async function heb(imageUrl, user, client) {
     if (!imageUrl) {
-      let ebs = await eyeBleachData.find({});
+      let ebs = await findAll(COLLECTION_NAME);
       if (ebs.length <= 0) {
         return "No hot eyebleach found";
       } else {
@@ -19,29 +20,21 @@ async function heb(imageUrl, user, db, client) {
         return {embeds: [embed]};
       }
     } else {
-      let found = await eyeBleachData.findOne({ url: imageUrl });
+      let found = await findOne({ url: imageUrl }, COLLECTION_NAME);
 
       if (found) {
         return "Duplicate image, try another one!";
       }
 
-      let lastEb = await eyeBleachData.findOne({}, { sort: { id: -1 } });
-      let newID = ((lastEb || {}).id || 0) + 1;
+      let newID = await getNextId(COLLECTION_NAME);
 
       download(
         imageUrl,
         "./images/heb/" + newID,
         async function (res) {
           if (!res) {
-            await eyeBleachData.update(
-              { id: newID },
-              { $set: { id: newID, url: imageUrl, owner: user.id } },
-              { upsert: true }
-            );
-            await userData.update(
-              { id: user.id },
-              { $inc: { gold: 100, heb_added: 1 } }
-            );
+            await updateOne({ id: newID }, { id: newID, url: imageUrl, owner: user.id }, COLLECTION_NAME);
+            await incrementUser(user.id, { gold: 100, heb_added: 1 });
             console.log("image downloaded");
           } else {
             console.log(res); 
@@ -51,19 +44,14 @@ async function heb(imageUrl, user, db, client) {
     }
 }
 
-async function rheb(imageId, user, db) {
-  const eyeBleachData = db.get("hoteyebleach");
-  const userData = db.get("users");
+async function rheb(imageId, user) {
     if (user.id === process.env.DISCORD_ADMIN_ID && imageId) {
-      let ebrm = await eyeBleachData.findOne({ id: parseInt(imageId) });
+      let ebrm = await findOne({ id: parseInt(imageId) }, COLLECTION_NAME);
 
       if (!ebrm) {
         return "ID: " + imageId + "does not exist.";
       } else {
-        await userData.update(
-          { id: ebrm.owner },
-          { $inc: { gold: -150, heb_added: -1 } }
-        );
+        await incrementUser(ebrm.owner, { gold: -150, heb_added: -1 });
 
         var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,6}\b(\/.*(jpg|jpeg|png|gif|bmp))/gi;
         var match = expression.exec(ebrm.url);
@@ -77,10 +65,9 @@ async function rheb(imageId, user, db) {
           });
         }
 
-        await eyeBleachData.remove({ id: ebrm.id });
+        await remove({ id: ebrm.id }, COLLECTION_NAME);
 
         return "fun image with id: " + imageId + " has been removed.";
-
       }
     }
 }

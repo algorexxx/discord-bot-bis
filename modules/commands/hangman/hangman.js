@@ -1,6 +1,8 @@
+const { incrementUser } = require("../services/userService");
 const getRandomInt = require("../../utilities/getRandomInt");
 const hangman_words = require("./hangmanwords.json").words;
 const hangmanEmbed = require("./hangmanEmbed");
+
 var hangMan = {
   gameState: {
     word: "",
@@ -27,8 +29,7 @@ var hangMan = {
       "New hangman game launched. Please use !guess <letter> to guess."
     );
   },
-  guess: async function (letter, guesser, db) {
-    const userData = db.get("users");
+  guess: async function (letter, guesser) {
     var correct_guess = false;
 
     if (
@@ -64,16 +65,16 @@ var hangMan = {
       correct_guess &&
       this.gameState.num_replaced_letters < this.gameState.word.length
     ) {
-      await userData.update({ id: guesser }, { $inc: { gold: 50 } });
+      await incrementUser(guesser, { gold: 50 });
       return hangmanEmbed(this.gameState, "Nice guess! You won 50 gold!");
     } else if (
       correct_guess &&
       this.gameState.num_replaced_letters == this.gameState.word.length
     ) {
       for (i = 0; i < this.gameState.participants.length; i++) {
-        await userData.update(
-          { id: this.gameState.participants[i] },
-          { $inc: { gold: 200 } }
+        await incrementUser(
+          this.gameState.participants[i],
+          { gold: 200 }
         );
       }
       return hangmanEmbed(
@@ -81,10 +82,10 @@ var hangMan = {
         "Nice guess, word completed! 200 gold has been distributed to each participant"
       );
     } else if (this.gameState.wrong_guesses >= 7) {
-      await userData.update({ id: guesser }, { $inc: { gold: -10 } });
+      await incrementUser(guesser, { gold: -10 });
       return hangmanEmbed(this.gameState, "Bad guess, rip your man :(..");
     } else {
-      await userData.update({ id: guesser }, { $inc: { gold: -10 } });
+      await incrementUser(guesser, { gold: -10 });
       return hangmanEmbed(this.gameState, "Bad guess!");
     }
   },

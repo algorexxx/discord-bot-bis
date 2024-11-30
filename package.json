@@ -23,7 +23,7 @@
     "discord.js": "^13.6.0",
     "ffmpeg-static": "^4.4.1",
     "libsodium-wrappers": "^0.7.9",
-    "monk": "^7.3.0",
+    "mongodb": "^6.11.0",
     "node-opus": "^0.3.3",
     "nodemon": "^2.0.4",
     "opusscript": "0.0.8",

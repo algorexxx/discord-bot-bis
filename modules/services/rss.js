@@ -1,18 +1,20 @@
 const Parser = require("rss-parser");
 const { MessageEmbed } = require('discord.js');
+const { findAll, getCollection } = require("./mongodbService");
 
-async function rss(db, client){
-  const feedData = db.get("rssfeeds");
-  let configs = await feedData.find();
+const COLLECTION_NAME = "rssfeeds";
+
+async function rss(client){
+  let configs = await findAll(COLLECTION_NAME);
 
   for (let i = 0; i<configs.length; i++){
     const config = configs[i];
-    setTimeout(() => {  getFeed(config, db, client); }, i*20000);
+    setTimeout(() => {  getFeed(config, client); }, i*20000);
   }
 }
 
-async function getFeed(config, db, client) {
-  const rssData = db.get(config.database);
+async function getFeed(config, client) {
+  const rssData = getCollection(config.database);
 
   let parser = new Parser({
     customFields: {
@@ -29,7 +31,7 @@ async function getFeed(config, db, client) {
       let found = await rssData.findOne({ url: feed.items[i].link });
 
       if (!found) {
-        await rssData.update(
+        await rssData.updateOne(
           { url: feed.items[i].link },
           { $set: { url: feed.items[i].link } },
           { upsert: true }

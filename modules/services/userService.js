@@ -1,3 +1,7 @@
+const {findOne, updateOne} = require("./mongodbService");
+
+const COLLECTION_NAME = "users";
+
 const defaultUser = {
     gold: 1000,
     online_mins: 0,
@@ -19,27 +23,40 @@ const defaultUser = {
     active: true,
   };
 
-  async function createNewUser(userId, userData){
+  async function createNewUser(userId){
       const user = defaultUser;
       user.id = userId;
 
-      await userData.update(
-        { id: userId },
-        { $set: user },
-        { upsert: true }
-      );
+      await updateOneUser(userId, user);
 
       return user;
   }
 
-  async function getUser(userId, userData){
-    const user = await userData.findOne({ id: userId });
+  async function getUser(userId){
+    const user = await findOneUser(userId);
     if (user){
-      await userData.update({ id: userId },{ $set: {active: true} },{ upsert: true });
+      await updateOneUser(userId, {active: true});
       return user;
     }
     
-    return await createNewUser(userId, userData);
+    return await createNewUser(userId);
   }
 
-  module.exports = {defaultUser: defaultUser, createNewUser: createNewUser, getUser: getUser};
+  async function updateUser(userId, updatedUser){
+    await updateOneUser(userId, updatedUser);
+  }
+
+  async function incrementUser(userId, inc){
+    const collection = await getCollection(COLLECTION_NAME)
+    await collection.updateOne({id: userId}, { $inc: inc });
+}
+
+  async function findOneUser(id){
+    return findOne({id: id}, COLLECTION_NAME);
+  }
+
+  async function updateOneUser(id, set){
+    return updateOne({id: id}, set, COLLECTION_NAME);
+  }
+
+  module.exports = {defaultUser: defaultUser, createNewUser: createNewUser, getUser: getUser, updateUser: updateUser, incrementUser: incrementUser};

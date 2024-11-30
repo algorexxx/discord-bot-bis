@@ -1,9 +1,7 @@
-const {getUser} = require("../services/userService");
+const {getUser, updateUser} = require("../services/userService");
 const inactivityVoiceChannelId = "436459953570578432";
 
-async function statsUpdate(db, client) {
-  const userData = db.get("users");
-
+async function statsUpdate(client) {
   const guild = await client.guilds.fetch("426479768947654659");
   const members = await guild.members.fetch();
 
@@ -11,7 +9,7 @@ async function statsUpdate(db, client) {
 
   for (let i = 0; i<memberIds.length; i++){
     const member = members.get(memberIds[i]);
-    const user = await getUser(member.user.id, userData);
+    const user = await getUser(member.user.id);
     const currentVoiceChannelId = member.voice.channelId;
 
     if (user.active) {
@@ -31,11 +29,7 @@ async function statsUpdate(db, client) {
       }
     }
     
-    await userData.update(
-      { id: member.user.id },
-      { $set: user },
-      { upsert: true }
-    );
+    await updateUser(user.id, user);
   }
 }
 

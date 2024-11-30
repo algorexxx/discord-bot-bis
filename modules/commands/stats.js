@@ -1,7 +1,7 @@
 const statsEmbed = require("../utilities/statsEmbed");
+const { getUser } = require("../services/userService");
 
-async function stats(userName, user, db, client) {
-  const userData = db.get("users");
+async function stats(userName, user, client) {
   const guild = await client.guilds.fetch("426479768947654659");
   let stats_user;
   let dUser;
@@ -18,7 +18,7 @@ async function stats(userName, user, db, client) {
       return;
     }
 
-    stats_user = await userData.findOne({ id: userId });
+    stats_user = await getUser(userId);
     if (!stats_user) {
       message.channel.send("No stats for this user, maybe inactive.");
       return;
