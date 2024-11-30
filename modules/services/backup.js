@@ -16,7 +16,7 @@ async function backup() {
     { data: songData, name: "songs" },
   ];
 
-  if (!fs.existsSync('./olddb')){
+  if (!fs.existsSync('./olddb')) {
     fs.mkdirSync('./olddb', { recursive: true });
   }
 

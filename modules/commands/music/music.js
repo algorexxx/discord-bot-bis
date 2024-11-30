@@ -1,15 +1,15 @@
 const { songEmbed, topSongsEmbed } = require("./musicEmbeds");
-const { 
-  joinVoiceChannel, 
-  getVoiceConnection, 
-  createAudioPlayer, 
-  createAudioResource, 
+const {
+  joinVoiceChannel,
+  getVoiceConnection,
+  createAudioPlayer,
+  createAudioResource,
   AudioPlayerStatus,
   NoSubscriberBehavior } = require('@discordjs/voice');
-const YTDL = require("ytdl-core");
+const YTDL = require("@distube/ytdl-core");
 var queue = [];
-const { findOne, updateOne, findAll, getNextId, remove, insert, findAllSorted, incrementOne } = require("../../services/mongodbService");
-const { incrementUser } = require("../services/userService");
+const { findOne, insert, findAllSorted, incrementOne } = require("../../services/mongodbService");
+const { incrementUser } = require("../../services/userService");
 
 const COLLECTION_NAME = "songs";
 
@@ -64,8 +64,8 @@ async function music(message, command, args, user, client) {
             }
 
             await incrementOne(
-              { id: all_music_ever_sorted[top_song - 1].id }, 
-              { times_requested: 1 }, 
+              { id: all_music_ever_sorted[top_song - 1].id },
+              { times_requested: 1 },
               COLLECTION_NAME);
             if (all_music_ever_sorted[top_song - 1].duration > 6000) {
               songs_cost += 500;
@@ -88,24 +88,24 @@ async function music(message, command, args, user, client) {
         if (added_songs == 1) {
           message.channel.send(
             all_music_ever_sorted[top_song - 1].title +
-              " - added to queue at a cost of " +
-              songs_cost +
-              " gold!"
+            " - added to queue at a cost of " +
+            songs_cost +
+            " gold!"
           );
         } else if (added_songs == 0) {
           message.channel.send(
             "No songs were added to queue. (" +
-              invalid_top_song +
-              " invalid songs)"
+            invalid_top_song +
+            " invalid songs)"
           );
         } else {
           message.channel.send(
             added_songs +
-              " songs was added to queue at a total cost of " +
-              songs_cost +
-              " gold! (" +
-              invalid_top_song +
-              " invalid songs)"
+            " songs was added to queue at a total cost of " +
+            songs_cost +
+            " gold! (" +
+            invalid_top_song +
+            " invalid songs)"
           );
         }
         return;
@@ -136,7 +136,7 @@ async function music(message, command, args, user, client) {
           let vinfo;
           try {
             vinfo = await YTDL.getBasicInfo(args[arg_no]);
-          } catch (e){
+          } catch (e) {
             message.channel.send("Couldnt get: " + song_id + " - Possibly restricted?");
             return;
           }
@@ -200,10 +200,10 @@ async function music(message, command, args, user, client) {
           if (user.gold < skip_cost) {
             message.channel.send(
               "Err. You cant afford to skip song. (Need: " +
-                skip_cost +
-                " Have: " +
-                user.gold +
-                ")"
+              skip_cost +
+              " Have: " +
+              user.gold +
+              ")"
             );
           } else {
             await incrementUser(
@@ -299,13 +299,13 @@ async function music(message, command, args, user, client) {
 }
 
 function play(message, command) {
-  if(((player || {})._state || {}).status === 'playing' && command !== "skip"){
+  if (((player || {})._state || {}).status === 'playing' && command !== "skip") {
     return;
   }
 
   let connection = getVoiceConnection(message.guild.id);
 
-  if (((connection || {})._state || {}).status !== 'connected'){
+  if (((connection || {})._state || {}).status !== 'connected') {
     joinVoiceChannel({
       channelId: message.member.voice.channel.id,
       guildId: message.guild.id,
@@ -314,7 +314,7 @@ function play(message, command) {
     connection = getVoiceConnection(message.guild.id);
   }
 
-  if (!player){
+  if (!player) {
     player = createAudioPlayer({
       behaviors: {
         noSubscriber: NoSubscriberBehavior.Play,
@@ -328,7 +328,7 @@ function play(message, command) {
     });
   }
 
-  if(queue.length <= 0){
+  if (queue.length <= 0) {
     player.stop();
     return;
   }
@@ -336,10 +336,10 @@ function play(message, command) {
   connection.subscribe(player);
 
   try {
-    let youtubeVideo = YTDL("https://youtu.be/" + queue[0].id, { filter: "audioonly", highWaterMark: 1<<25 });
-    const resource = createAudioResource(youtubeVideo,{ inlineVolume: true, highWaterMark: 1<<25 });
+    let youtubeVideo = YTDL("https://youtu.be/" + queue[0].id, { filter: "audioonly", highWaterMark: 1 << 25 });
+    const resource = createAudioResource(youtubeVideo, { inlineVolume: true, highWaterMark: 1 << 25 });
     resource.volume.setVolume(0.2)
-  
+
     player.play(resource);
   } catch (e) {
     queue.shift();
@@ -347,7 +347,7 @@ function play(message, command) {
     else connection.disconnect();
     message.channel.send("Couldnt play: " + song_id + " - Possibly restricted?");
   }
-  
+
 }
 
 module.exports = music;

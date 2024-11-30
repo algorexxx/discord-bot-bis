@@ -1,4 +1,4 @@
-const { findOne, updateOne, findAll, getNextId, remove, insert } = require("../services/mongodbService");
+const { findAll, remove, insert } = require("../services/mongodbService");
 const { incrementUser } = require("../services/userService");
 
 const COLLECTION_NAME = "coinflips";
@@ -39,9 +39,9 @@ async function eyeBleach(message, command, argument, user, client) {
         await incrementUser(user.id, { gold: -parseInt(argument) });
         message.reply(
           message.author.username +
-            "'s coinflip of " +
-            parseInt(argument) +
-            " gold has been added."
+          "'s coinflip of " +
+          parseInt(argument) +
+          " gold has been added."
         );
       }
       break;
@@ -81,10 +81,10 @@ async function eyeBleach(message, command, argument, user, client) {
 
         message.reply(
           (await client.users.fetch(winner_id)).username +
-            " just won " +
-            coinflips[coinflip_index].ammount +
-            " gold off of " +
-            (await client.users.fetch(loser_id)).username
+          " just won " +
+          coinflips[coinflip_index].ammount +
+          " gold off of " +
+          (await client.users.fetch(loser_id)).username
         );
         await remove({ _id: coinflips[coinflip_index]._id, }, COLLECTION_NAME);
       }
@@ -103,10 +103,10 @@ async function eyeBleach(message, command, argument, user, client) {
         await incrementUser(user.id, { gold: coinflips[argument - 1].ammount });
         message.reply(
           "Coinflip " +
-            argument +
-            " has been canceled and " +
-            coinflips[argument - 1].ammount +
-            " gold has been returned."
+          argument +
+          " has been canceled and " +
+          coinflips[argument - 1].ammount +
+          " gold has been returned."
         );
         await remove({
           _id: coinflips[argument - 1]._id,

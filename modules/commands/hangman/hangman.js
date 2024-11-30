@@ -1,4 +1,4 @@
-const { incrementUser } = require("../services/userService");
+const { incrementUser } = require("../../services/userService");
 const getRandomInt = require("../../utilities/getRandomInt");
 const hangman_words = require("./hangmanwords.json").words;
 const hangmanEmbed = require("./hangmanEmbed");
@@ -29,7 +29,12 @@ var hangMan = {
       "New hangman game launched. Please use !guess <letter> to guess."
     );
   },
-  guess: async function (letter, guesser) {
+  guess: async function (letterGuess, guesser) {
+    if (!letterGuess) {
+      return "Maybe try and guess something?"
+    }
+
+    const letter = letterGuess.substring(0, 1);
     var correct_guess = false;
 
     if (

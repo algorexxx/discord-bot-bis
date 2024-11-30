@@ -1,4 +1,4 @@
-const {getUser, updateUser} = require("../services/userService");
+const { getUser, updateUser } = require("../services/userService");
 const inactivityVoiceChannelId = "436459953570578432";
 
 async function statsUpdate(client) {
@@ -7,7 +7,7 @@ async function statsUpdate(client) {
 
   const memberIds = Array.from(members.keys());
 
-  for (let i = 0; i<memberIds.length; i++){
+  for (let i = 0; i < memberIds.length; i++) {
     const member = members.get(memberIds[i]);
     const user = await getUser(member.user.id);
     const currentVoiceChannelId = member.voice.channelId;
@@ -22,13 +22,13 @@ async function statsUpdate(client) {
         console.log(user.id + " -  was given 20 gold for being in voice chat.");
         user.gold += 20;
         user.online_mins += 3;
-        if (!user.voiceChannels){
+        if (!user.voiceChannels) {
           user.voiceChannels = {};
         }
         user.voiceChannels[currentVoiceChannelId] = (user.voiceChannels[currentVoiceChannelId] || 0) + 3;
       }
     }
-    
+
     await updateUser(user.id, user);
   }
 }

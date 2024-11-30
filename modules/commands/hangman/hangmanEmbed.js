@@ -17,25 +17,27 @@ async function hangmanEmbed(gamestate, message) {
     guessedLetters += gamestate.guessed_letters[i] + ", ";
   }
   if (guessedLetters == "")
-  guessedLetters = "None";  
+    guessedLetters = "None";
 
   const hangmanEmbed = new MessageEmbed()
     .setColor('#74008B')
-    .setAuthor({ name: 'Hangman', iconURL: 'https://img.utdstc.com/icon/50a/285/50a28521de117c0e6e257c2c5d334134ab791677619a4cd8ae932c8fc4350d0c:200'})
+    .setAuthor({ name: 'Hangman', iconURL: 'https://img.utdstc.com/icon/50a/285/50a28521de117c0e6e257c2c5d334134ab791677619a4cd8ae932c8fc4350d0c:200' })
     .setDescription('Try not to hang the poor man.')
     .addFields(
       { name: 'Status:', value: message },
       { name: 'Word:', value: gamestate.result.replaceAll(",", "\\_ ") },
       { name: 'Tried letters:', value: guessedLetters, inline: true },
-      { name: 'Right/Wrong Guesses', value: gamestate.guessed_letters.length -
-      gamestate.wrong_guesses +
-      "/" +
-      gamestate.wrong_guesses, inline: true },
-      )
-      .setImage(hangman_imgs[gamestate.wrong_guesses])
-      .setFooter({ text: 'Incorrect: -10 gold | Correct: +50 gold | Completed word: +200 gold to all.', iconURL: 'https://img.utdstc.com/icon/50a/285/50a28521de117c0e6e257c2c5d334134ab791677619a4cd8ae932c8fc4350d0c:200' });
+      {
+        name: 'Right/Wrong Guesses', value: gamestate.guessed_letters.length -
+          gamestate.wrong_guesses +
+          "/" +
+          gamestate.wrong_guesses, inline: true
+      },
+    )
+    .setImage(hangman_imgs[gamestate.wrong_guesses])
+    .setFooter({ text: 'Incorrect: -10 gold | Correct: +50 gold | Completed word: +200 gold to all.', iconURL: 'https://img.utdstc.com/icon/50a/285/50a28521de117c0e6e257c2c5d334134ab791677619a4cd8ae932c8fc4350d0c:200' });
 
-    return { embeds: [hangmanEmbed]};
+  return { embeds: [hangmanEmbed] };
 }
 
 String.prototype.replaceAt = function (index, replacement) {

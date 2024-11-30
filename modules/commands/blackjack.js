@@ -341,11 +341,11 @@ async function blackjacko(message, command, argument, user, client) {
         calcBJValue(blackjack.dealer_cards) == calcBJValue(blackjack.user_cards)
       ) {
         msg = "\n\nTie! Better than nothing! To play again use !bet <amount>";
-        
+
         await incrementUser(user.id, { gold: blackjack.bet, blackjack_ties: 1 });
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
-        
+
         blackjack.active = 0;
         reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
         buttons = ['⤵️', '🔁', '⤴️'];
@@ -428,7 +428,7 @@ async function blackjacko(message, command, argument, user, client) {
 
       await incrementUser(user.id, { gold: -blackjack.bet });
       user.gold -= blackjack.bet;
-      
+
       blackjack.bet = blackjack.bet + blackjack.bet;
 
       while (calcBJValue(blackjack.dealer_cards) < 17) {
@@ -465,7 +465,7 @@ async function blackjacko(message, command, argument, user, client) {
         user.gold += blackjack.bet * 2;
         user.blackjack_wins += 1;
         await incrementUser(user.id, { gold: blackjack.bet * 2, blackjack_wins: 1 });
-        
+
         blackjack.active = 0;
         reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
         buttons = ['⤵️', '🔁', '⤴️'];
@@ -477,7 +477,7 @@ async function blackjacko(message, command, argument, user, client) {
         user.gold += blackjack.bet;
         user.blackjack_ties += 1;
         await incrementUser(user.id, { gold: blackjack.bet, blackjack_ties: 1 });
-        
+
         blackjack.active = 0;
         reply = await message.reply(await blackjackEmbed(blackjack, msg, user, client));
         buttons = ['⤵️', '🔁', '⤴️'];
