@@ -1,18 +1,21 @@
 const Parser = require("rss-parser");
 const { MessageEmbed } = require('discord.js');
+const { findAll, getCollection } = require("./mongodbService");
 
-async function rss(db, client){
-  const feedData = db.get("rssfeeds");
-  let configs = await feedData.find();
+const COLLECTION_NAME = "rssfeeds";
 
-  for (let i = 0; i<configs.length; i++){
+async function rss(client) {
+  let configs = await findAll(COLLECTION_NAME);
+  console.log(configs);
+
+  for (let i = 0; i < configs.length; i++) {
     const config = configs[i];
-    setTimeout(() => {  getFeed(config, db, client); }, i*20000);
+    setTimeout(() => { getFeed(config, client); }, i * 20000);
   }
 }
 
-async function getFeed(config, db, client) {
-  const rssData = db.get(config.database);
+async function getFeed(config, client) {
+  const rssData = await getCollection(config.database);
 
   let parser = new Parser({
     customFields: {
@@ -29,13 +32,13 @@ async function getFeed(config, db, client) {
       let found = await rssData.findOne({ url: feed.items[i].link });
 
       if (!found) {
-        await rssData.update(
+        await rssData.updateOne(
           { url: feed.items[i].link },
           { $set: { url: feed.items[i].link } },
           { upsert: true }
         );
         let channel = await client.channels.fetch(config.channelId);
-        channel.send({embeds: [redditEmbed(config, feed.items[i])]});
+        channel.send({ embeds: [redditEmbed(config, feed.items[i])] });
       }
     }
   })();
@@ -53,15 +56,15 @@ function redditEmbed(config, item) {
   }
 
   let thumbnailUrl = ((item.thumbnail || {})['$'] || {}).url || "";
-  if (thumbnailUrl.length > 0){
+  if (thumbnailUrl.length > 0) {
     thumb_url = thumbnailUrl;
   } else {
     thumb_url = config.thumbnail;
   }
-  
+
   const embed = new MessageEmbed()
     .setColor('#03D3D4')
-    .setTitle(item.title.length > 255 ? item.title.substring(0,250) + "..." : item.title)
+    .setTitle(item.title.length > 255 ? item.title.substring(0, 250) + "..." : item.title)
     .setURL(item.link)
     .setAuthor({ name: config.title, iconURL: config.iconUrl, url: config.url })
     .setThumbnail(thumb_url)
@@ -69,7 +72,7 @@ function redditEmbed(config, item) {
     .setFooter({ text: "Added by " + item.author, iconURL: config.iconUrl });
 
   if (content) embed.setDescription(content);
-    return embed;
+  return embed;
 }
 
 module.exports = rss;

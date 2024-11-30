@@ -68,26 +68,26 @@ function songEmbed(songs, fun_title) {
     .setColor('#BEFC65')
     .setTitle(songs[0].title)
     .setURL('https://discord.js.org/')
-    .setAuthor({ name: "Music Lovers: " + fun_title[0], iconURL: "https://cdn1.iconfinder.com/data/icons/google_jfk_icons_by_carlosjj/512/music.png"})
+    .setAuthor({ name: "Music Lovers: " + fun_title[0], iconURL: "https://cdn1.iconfinder.com/data/icons/google_jfk_icons_by_carlosjj/512/music.png" })
     .setDescription("Duration: " +
-    secondsToTime(songs[0].duration) +
-    " | Requested: " +
-    songs[0].times_requested +
-    " times\n[[Youtube]](https://youtu.be/" +
-    songs[0].id +
-    ") | [[Discogs]](https://www.discogs.com/search/?q=" +
-    songs[0].title.replace(/ /g, "+").replace(/[\(\)]/g, "") +
-    "&type=all)")
+      secondsToTime(songs[0].duration) +
+      " | Requested: " +
+      songs[0].times_requested +
+      " times\n[[Youtube]](https://youtu.be/" +
+      songs[0].id +
+      ") | [[Discogs]](https://www.discogs.com/search/?q=" +
+      songs[0].title.replace(/ /g, "+").replace(/[\(\)]/g, "") +
+      "&type=all)")
     .setThumbnail(songs[0].thumbnail);
 
-    if (song_embed.embed.fields){
-      song_embed.embed.fields.forEach(field => {
-        songEmbed.addFields({ name: field.name, value: field.value});
-      });
-    }
-    
+  if (song_embed.embed.fields) {
+    song_embed.embed.fields.forEach(field => {
+      songEmbed.addFields({ name: field.name, value: field.value });
+    });
+  }
 
-    return { embeds: [songEmbed]};
+
+  return { embeds: [songEmbed] };
 }
 
 function topSongsEmbed(start_number, end_number, all_music_ever_sorted) {
@@ -158,23 +158,25 @@ function topSongsEmbed(start_number, end_number, all_music_ever_sorted) {
     }
   }
 
-    const topSongsEmbed = new MessageEmbed()
-      .setColor('#810597')
-      .setAuthor({ name: "Music Lovers: Top " +
-      (start_number + 1) +
-      "-" +
-      end_number +
-      " Songs", iconURL: 'https://cdn1.iconfinder.com/data/icons/google_jfk_icons_by_carlosjj/512/music.png' })
-      .setFooter({ text: "Total number of songs: " + all_music_ever_sorted.length, iconURL: 'http://i.imgur.com/dWBfiT6.png' });
+  const topSongsEmbed = new MessageEmbed()
+    .setColor('#810597')
+    .setAuthor({
+      name: "Music Lovers: Top " +
+        (start_number + 1) +
+        "-" +
+        end_number +
+        " Songs", iconURL: 'https://cdn1.iconfinder.com/data/icons/google_jfk_icons_by_carlosjj/512/music.png'
+    })
+    .setFooter({ text: "Total number of songs: " + all_music_ever_sorted.length, iconURL: 'http://i.imgur.com/dWBfiT6.png' });
 
-      if (top_songs_embed.embed.fields){
-        top_songs_embed.embed.fields.forEach(field => {
-          topSongsEmbed.addFields({ name: field.name, value: field.value});
-        });
-      }
+  if (top_songs_embed.embed.fields) {
+    top_songs_embed.embed.fields.forEach(field => {
+      topSongsEmbed.addFields({ name: field.name, value: field.value });
+    });
+  }
 
-      return { embeds: [topSongsEmbed]};
-    }
+  return { embeds: [topSongsEmbed] };
+}
 
 function secondsToTime(secs) {
   var hours = Math.floor(secs / (60 * 60));

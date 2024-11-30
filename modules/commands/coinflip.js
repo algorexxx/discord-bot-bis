@@ -1,8 +1,11 @@
-async function eyeBleach(message, command, argument, user, db, client) {
-  const coinflipData = db.get("coinflips");
-  const userData = db.get("users");
+const { findAll, remove, insert } = require("../services/mongodbService");
+const { incrementUser, getUser } = require("../services/userService");
 
-  let coinflips = await coinflipData.find({});
+const COLLECTION_NAME = "coinflips";
+
+async function eyeBleach(message, command, argument, client) {
+  const user = await getUser(message.author.id);
+  let coinflips = await findAll(COLLECTION_NAME);
 
   switch (command.toLowerCase()) {
     case "coinflip":
@@ -30,20 +33,16 @@ async function eyeBleach(message, command, argument, user, db, client) {
       } else if (!(parseInt(argument) > 0)) {
         message.reply("Invalid bet ammount.");
       } else {
-        await coinflipData.insert({
+        await insert({
           user: message.author.id,
           ammount: parseInt(argument),
-        });
-        await userData.update(
-          { id: user.id },
-          { $inc: { gold: -parseInt(argument) } },
-          { upsert: true }
-        );
+        }, COLLECTION_NAME);
+        await incrementUser(user.id, { gold: -parseInt(argument) });
         message.reply(
           message.author.username +
-            "'s coinflip of " +
-            parseInt(argument) +
-            " gold has been added."
+          "'s coinflip of " +
+          parseInt(argument) +
+          " gold has been added."
         );
       }
       break;
@@ -59,11 +58,7 @@ async function eyeBleach(message, command, argument, user, db, client) {
           "You can't join your own coinflip. Use !cancel to get your gold returned."
         );
       } else {
-        await userData.update(
-          { id: user.id },
-          { $inc: { gold: -coinflips[coinflip_index].ammount } },
-          { upsert: true }
-        );
+        await incrementUser(user.id, { gold: -coinflips[coinflip_index].ammount });
         win_no = Math.round(Math.random());
         let winner_id, loser_id;
         if (win_no == 0) {
@@ -77,32 +72,22 @@ async function eyeBleach(message, command, argument, user, db, client) {
             "Something went wrong with coinflip, notify admin that the winning number was not between 0 and 1."
           );
         }
-        await userData.update(
-          { id: winner_id },
+        await incrementUser(winner_id,
           {
-            $inc: {
-              coinflips_won: 1,
-              gold: Math.floor(coinflips[coinflip_index].ammount * 1.9),
-            },
-          },
-          { upsert: true }
+            coinflips_won: 1,
+            gold: Math.floor(coinflips[coinflip_index].ammount * 1.9),
+          }
         );
-        await userData.update(
-          { id: loser_id },
-          { $inc: { coinflips_lost: 1 } },
-          { upsert: true }
-        );
+        await incrementUser(loser_id, { coinflips_lost: 1 });
 
         message.reply(
           (await client.users.fetch(winner_id)).username +
-            " just won " +
-            coinflips[coinflip_index].ammount +
-            " gold off of " +
-            (await client.users.fetch(loser_id)).username
+          " just won " +
+          coinflips[coinflip_index].ammount +
+          " gold off of " +
+          (await client.users.fetch(loser_id)).username
         );
-        await coinflipData.remove({
-          _id: coinflips[coinflip_index]._id,
-        });
+        await remove({ _id: coinflips[coinflip_index]._id, }, COLLECTION_NAME);
       }
       break;
 
@@ -116,25 +101,17 @@ async function eyeBleach(message, command, argument, user, db, client) {
       } else if (coinflips[argument - 1].user != user.id) {
         message.reply("You cannot cancel someone elses coinflip.");
       } else {
-        await userData.update(
-          { id: user.id },
-          {
-            $inc: {
-              gold: coinflips[argument - 1].ammount,
-            },
-          },
-          { upsert: true }
-        );
+        await incrementUser(user.id, { gold: coinflips[argument - 1].ammount });
         message.reply(
           "Coinflip " +
-            argument +
-            " has been canceled and " +
-            coinflips[argument - 1].ammount +
-            " gold has been returned."
+          argument +
+          " has been canceled and " +
+          coinflips[argument - 1].ammount +
+          " gold has been returned."
         );
-        await coinflipData.remove({
+        await remove({
           _id: coinflips[argument - 1]._id,
-        });
+        }, COLLECTION_NAME);
       }
       break;
   }
