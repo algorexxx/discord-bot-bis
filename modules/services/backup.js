@@ -1,21 +1,22 @@
 const fs = require("fs");
+const { findAll } = require("./mongodbService");
 
-async function backup(db) {
-  const userData = db.get("users");
-  const ebData = db.get("eyebleach");
-  const funData = db.get("fun");
-  const hebData = db.get("hoteyebleach");
-  const songData = db.get("songs");
+async function backup() {
+  const userData = await findAll("users");
+  const ebData = await findAll("eyebleach");
+  const funData = await findAll("fun");
+  const hebData = await findAll("hoteyebleach");
+  const songData = await findAll("songs");
 
   let data = [
-    { data: await userData.find({}), name: "users" },
-    { data: await ebData.find({}), name: "ebs" },
-    { data: await hebData.find({}), name: "hebs" },
-    { data: await funData.find({}), name: "funs" },
-    { data: await songData.find({}), name: "songs" },
+    { data: userData, name: "users" },
+    { data: ebData, name: "ebs" },
+    { data: hebData, name: "hebs" },
+    { data: funData, name: "funs" },
+    { data: songData, name: "songs" },
   ];
 
-  if (!fs.existsSync('./olddb')){
+  if (!fs.existsSync('./olddb')) {
     fs.mkdirSync('./olddb', { recursive: true });
   }
 

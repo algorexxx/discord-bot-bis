@@ -1,20 +1,15 @@
-const {getUser} = require("../services/userService");
+const { getUser, updateUser } = require("../services/userService");
 
-async function incrementMessageCount(message, db) {
-  const userData = db.get("users");
-  const user = await getUser(message.author.id, userData);
+async function incrementMessageCount(message) {
+  const user = await getUser(message.author.id);
 
-  if (!user.textChannels){
+  if (!user.textChannels) {
     user.textChannels = {};
   }
 
   user.textChannels[message.channelId] = (user.textChannels[message.channelId] || 0) + 1;
-  
-  await userData.update(
-    { id: message.author.id },
-    { $set: user },
-    { upsert: true }
-  );
+
+  await updateUser(user.id, user);
 }
 
 module.exports = incrementMessageCount;

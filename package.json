@@ -1,10 +1,10 @@
 {
   "name": "discord-bot-bis",
-  "version": "2.1.2",
+  "version": "3.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "botv2.js",
   "scripts": {
-    "start": "nodemon ./index.js"
+    "start": "nodemon ./botv2.js"
   },
   "repository": {
     "type": "git",
@@ -18,17 +18,17 @@
   "homepage": "https://github.com/ernyx/discord-bot-bis#readme",
   "dependencies": {
     "@discordjs/rest": "^0.3.0",
-    "@discordjs/voice": "^0.16.1",
+    "@discordjs/voice": "^0.18.0",
+    "@distube/ytdl-core": "^4.15.1",
     "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
     "ffmpeg-static": "^4.4.1",
     "libsodium-wrappers": "^0.7.9",
-    "monk": "^7.3.0",
+    "mongodb": "^6.11.0",
     "node-opus": "^0.3.3",
     "nodemon": "^2.0.4",
     "opusscript": "0.0.8",
     "request": "^2.88.2",
-    "rss-parser": "^3.8.0",
-    "ytdl-core": "^4.11.2"
+    "rss-parser": "^3.13.0"
   }
 }
