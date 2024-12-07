@@ -3,7 +3,7 @@ const settings = require('../../../botSettings');
 const { getAllUsers } = require("../../services/userService");
 const minutesToDisplayString = require("../../utilities/minutesToDisplayString")
 
-async function getGlobalStats(client, argument) {
+async function getGlobalStats(client, argument, message) {
     const data = {};
     const lookups = await getLookups(client);
     const users = await getAllUsers();
@@ -12,10 +12,10 @@ async function getGlobalStats(client, argument) {
         loadDataBasedOnArgument(user, argument, data, lookups);
     });
 
-    return { embeds: buildEmbeds(data, lookups) };
+    buildEmbeds(data, lookups, message)
 }
 
-function buildEmbeds(data, lookups){
+function buildEmbeds(data, lookups, message){
     const embeds = []
 
     Object.keys(data).forEach(dataProperty => {
@@ -48,6 +48,7 @@ function buildEmbeds(data, lookups){
                 inline: true
             })
             embeds.push(embed);
+            message.reply({embeds: [embed]});
         })
     });
 
@@ -80,9 +81,12 @@ function loadDataBasedOnArgument(user, argument, data, lookups) {
         loadSimpleProperty("Time in voice chat", "online_mins", user, getGroupData("General", data), minutesToDisplayString);
     }
 
-    if (argument == "channels") {
-        loadChannels("Voice channels", "voiceChannels", user, data, lookups, minutesToDisplayString);
+    if (argument == "textchannels") {
         loadChannels("Text channel", "textChannels", user, data, lookups, v => v + " messages");
+    }
+
+    if (argument == "voicechannels") {
+        loadChannels("Voice channels", "voiceChannels", user, data, lookups, minutesToDisplayString);
     }
 
     if (argument == "gambling") {
@@ -159,9 +163,13 @@ function loadChannels(groupHeader, dataProperty, user, data, lookups, valueTrans
     }
 
     Object.keys(user[dataProperty]).forEach(voiceChannelId => {
+        const header = lookups.channels.get(voiceChannelId);
+        if (!header){
+            return;
+        }
         if (!data[voiceChannelId]) {
             const dataContainer = {
-                header: lookups.channels.get(voiceChannelId),
+                header: header,
                 data: [],
                 valueTransform: valueTransform
             };
