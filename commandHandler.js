@@ -10,8 +10,9 @@ const helpEmbed = require("./modules/utilities/helpEmbed");
 const backup = require("./modules/services/backup");
 const settings = require('./botSettings');
 const { getUser } = require("./modules/services/userService");
+const getGlobalStats = require("./modules/commands/globalStats/globalStats")
 
-async function processCommand(command, message, arguments, client){
+async function processCommand(command, message, arguments, client) {
     switch (command) {
         case "help":
             message.reply({ embeds: [helpEmbed()] });
@@ -69,6 +70,10 @@ async function processCommand(command, message, arguments, client){
             break;
         case "backup":
             await backup();
+            break;
+        case "gstats":
+        case "globalstats":
+            message.reply(await getGlobalStats(client, arguments[0]));
             break;
     }
 }
