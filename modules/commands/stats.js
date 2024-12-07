@@ -4,18 +4,19 @@ const settings = require('../../botSettings');
 
 async function getStats(userName, message, client) {
   const guild = await client.guilds.fetch(settings.GUILD_ID);
-  const userId = getUserId(userName, message);
+  const userId = await getUserId(userName, message, guild);
+  
   const user = await getUser(userId);
-    if (!user) {
-      message.channel.send("No stats for this user, maybe inactive.");
-      return;
-    }
-
-  return { embeds: [await statsEmbed(dUser.displayName, dUser.displayAvatarURL(), stats_user, guild.channels)] };
+  if (!user) {
+    message.channel.send("No stats for this user, maybe inactive.");
+    return;
+  }
+  const discordUser = await guild.members.fetch(userId);
+  return { embeds: [await statsEmbed(discordUser.displayName, discordUser.displayAvatarURL(), user, guild.channels)] };
 }
 
-async function getUserId(userName, message){
-  if (userName){
+async function getUserId(userName, message, guild) {
+  if (userName) {
     const users = await guild.members.fetch({ query: userName, limit: 1 });
     const userId = users.keys().next().value;
 
