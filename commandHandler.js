@@ -73,7 +73,7 @@ async function processCommand(command, message, arguments, client) {
             break;
         case "gstats":
         case "globalstats":
-            message.reply(await getGlobalStats(client, arguments[0]));
+            await getGlobalStats(client, arguments[0], message);
             break;
     }
 }
