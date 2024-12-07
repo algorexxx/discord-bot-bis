@@ -1,4 +1,4 @@
-const { findOne, updateOne, getCollection } = require("./mongodbService");
+const { findOne, updateOne, getCollection, findAll } = require("./mongodbService");
 
 const COLLECTION_NAME = "users";
 
@@ -42,6 +42,10 @@ async function getUser(userId) {
   return await createNewUser(userId);
 }
 
+async function getAllUsers() {
+  return await findAll(COLLECTION_NAME);
+}
+
 async function updateUser(userId, updatedUser) {
   await updateOneUser(userId, updatedUser);
 }
@@ -75,6 +79,7 @@ module.exports = {
   defaultUser: defaultUser,
   createNewUser: createNewUser,
   getUser: getUser,
+  getAllUsers: getAllUsers,
   updateUser: updateUser,
   incrementUser: incrementUser,
   incrementMessageCount: incrementMessageCount
