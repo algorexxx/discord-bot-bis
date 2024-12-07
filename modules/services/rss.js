@@ -6,7 +6,6 @@ const COLLECTION_NAME = "rssfeeds";
 
 async function rss(client) {
   let configs = await findAll(COLLECTION_NAME);
-  console.log(configs);
 
   for (let i = 0; i < configs.length; i++) {
     const config = configs[i];

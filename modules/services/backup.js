@@ -41,8 +41,6 @@ async function backup() {
       }
     );
   });
-
-  console.log("done");
 }
 
 module.exports = backup;
