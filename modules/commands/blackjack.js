@@ -543,22 +543,22 @@ async function awaitReactions(message, reply, filter, user, client, bet) {
       const reaction = collected.first();
       switch (reaction.emoji.name) {
         case '📥':
-          await blackjacko(message, "hit", undefined, user, client);
+          await blackjacko(message, "hit", undefined, client);
           break;
         case '🛑':
-          await blackjacko(message, "stand", undefined, user, client);
+          await blackjacko(message, "stand", undefined, client);
           break;
         case '🔁':
-          await blackjacko(message, "bet", bet, user, client);
+          await blackjacko(message, "bet", bet, client);
           break;
         case '🇩':
-          await blackjacko(message, "double", undefined, user, client);
+          await blackjacko(message, "double", undefined, client);
           break;
         case '⤴️':
-          await blackjacko(message, "bet", bet * 2, user, client);
+          await blackjacko(message, "bet", bet * 2, client);
           break;
         case '⤵️':
-          await blackjacko(message, "bet", bet / 2, user, client);
+          await blackjacko(message, "bet", bet / 2, client);
           break;
       }
     })
