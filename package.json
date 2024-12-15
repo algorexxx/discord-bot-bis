@@ -19,7 +19,7 @@
   "dependencies": {
     "@discordjs/rest": "^0.3.0",
     "@discordjs/voice": "^0.18.0",
-    "@distube/ytdl-core": "^4.15.1",
+    "@distube/ytdl-core": "^4.15.2",
     "discord-api-types": "^0.26.1",
     "discord.js": "^13.6.0",
     "env-cmd": "^10.1.0",
