@@ -108,3 +108,5 @@ dist
 package-lock.json
 
 cookies.json
+
+*.bak

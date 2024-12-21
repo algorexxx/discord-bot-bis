@@ -12,7 +12,13 @@ const { findOne, insert, findAllSorted, incrementOne } = require("../../services
 const { incrementUser, getUser } = require("../../services/userService");
 const fs = require("fs");
 let agent;
-try { agent = YTDL.createAgent(JSON.parse(fs.readFileSync("cookies.json"))); } catch(e){}
+try { 
+  const cookie = JSON.parse(fs.readFileSync("cookies.json"));
+  console.log(cookie);
+  agent = YTDL.createAgent(cookie); 
+} catch(e){
+  console.log(e);
+}
 
 const COLLECTION_NAME = "songs";
 
@@ -144,7 +150,7 @@ async function music(message, command, args, client) {
               vinfo = await YTDL.getBasicInfo(args[arg_no]);
             }
           } catch (e) {
-            message.channel.send("Couldnt get: " + song_id + " - Cookie expired?");
+            message.channel.send("Couldnt get: " + song_id + " - " + e);
             return;
           }
 
@@ -328,6 +334,13 @@ function play(message, command) {
       },
     });
 
+    player.on('error', error => {
+      queue.shift();
+      if (queue[0]) play(message);
+      else connection.disconnect();
+      message.channel.send("Couldnt play selected song: " + error);
+    });
+
     player.on(AudioPlayerStatus.Idle, () => {
       queue.shift();
       if (queue[0]) play(message);
@@ -349,6 +362,7 @@ function play(message, command) {
     } catch (e){
       youtubeVideo = YTDL("https://youtu.be/" + queue[0].id, { filter: "audioonly", highWaterMark: 1 << 25 });
     }
+    
     const resource = createAudioResource(youtubeVideo, { inlineVolume: true, highWaterMark: 1 << 25 });
     resource.volume.setVolume(0.2)
 
@@ -357,7 +371,7 @@ function play(message, command) {
     queue.shift();
     if (queue[0]) play(message);
     else connection.disconnect();
-    message.channel.send("Couldnt play: " + song_id + " - Cookie expired?");
+    message.channel.send("Couldnt play: " + song_id + " - " + e);
   }
 
 }
